@@ -6,10 +6,18 @@ interface SidebarProps {
   config: GenerationConfig;
   isGenerating: boolean;
   onConfigChange: (newConfig: GenerationConfig) => void;
-  onGenerate: (isSet?: boolean) => void;
+  onGenerate: (isSet?: boolean, selectedPerspectives?: string[]) => void;
 }
 
 // --- CONSTANTS ---
+
+const PERSPECTIVE_OPTIONS = [
+  { id: 'top-down', label: 'Top Down', icon: ArrowUp },
+  { id: 'isometric', label: 'Isometric', icon: Box },
+  { id: 'side', label: 'Side', icon: Layers },
+  { id: 'front', label: 'Front', icon: Eye },
+  { id: 'rear', label: 'Rear', icon: CircleDashed },
+];
 
 const CAR_COLORS = [
   { name: 'Red', hex: '#ef4444' },
@@ -43,15 +51,10 @@ const PAINT_FINISHES = [
 ];
 
 const RIM_STYLES = [
-  // Racing / Performance
   'TE37 Style (6-Spoke)', 'RPF1 Style (Twin Spoke)', 'Work Meister (Deep Dish)', 'CE28 Style (Multi-spoke)', 'Advan 3-Spoke',
-  // Drag Specific
   'Weld Racing (Magnum)', 'Drag Star (5-Spoke)', 'Beadlock Drag', 'Solid Disc (Aero)', 'Skinny Front Runners', 'Centerline Convo Pro',
-  // Classic / Muscle
   'Cragar S/S', 'Torq Thrust', 'Steelies (Black)', 'Steelies (Chrome Hub)', 'Wire Spoke (Dayton)', 'Rallye Wheels',
-  // Modern / Euro
   'Rotiform Aerodisc', 'BBS Mesh (RS)', 'Turbofan', 'Concave 5-Spoke', 'Split 5-Spoke', 'ASANTI AF141',
-  // Wild
   'Spinner Rims', 'Neon Light-Up', 'Transparent/Glass', 'Gold Plated'
 ];
 
@@ -83,7 +86,7 @@ const TIRE_PROFILE_OPTIONS = [
 
 const CAR_GROUPS = [
   {
-    category: "JDM Legends (90s-00s)",
+    category: "JDM Icons (Classic & 90s)",
     cars: [
       "Nissan Skyline GT-R R34 V-Spec", "Nissan Skyline GT-R R33", "Nissan Skyline GT-R R32",
       "Toyota Supra MK4 (JZA80)", "Mazda RX-7 FD Spirit R", "Honda NSX-R (NA2)",
@@ -91,61 +94,86 @@ const CAR_GROUPS = [
       "Subaru Impreza 22B STi", "Nissan Silvia S15 Spec-R", "Nissan Silvia S14 Kouki",
       "Nissan 180SX Type X", "Honda S2000 CR", "Toyota AE86 Sprinter Trueno",
       "Mazda RX-7 FC3S", "Mitsubishi 3000GT VR-4", "Toyota Celica GT-Four ST205",
-      "Honda Integra Type R DC2", "Honda Civic Type R EK9"
+      "Honda Integra Type R DC2", "Honda Civic Type R EK9", "Toyota Chaser JZX100",
+      "Toyota Mark II JZX110", "Nissan Laurel C33", "Nissan Cefiro A31",
+      "Nissan Pulsar GTI-R", "Mitsubishi Galant VR-4", "Subaru Legacy RS",
+      "Honda Accord Euro R (CL7)", "Lexus IS300 (SXE10)", "Mazda RX-3",
+      "Datsun 240Z", "Datsun 510", "Toyota Starlet KP61", "Nissan Sunny Truck (B120)"
     ]
   },
   {
-    category: "Street Tuner Heroes",
+    category: "Modern JDM & Tuners",
     cars: [
-      "Nissan 350Z (Z33)", "Infiniti G35 Coupe", "Mazda MX-5 Miata (NA)", "Mazda MX-5 Miata (ND)",
-      "Honda S2000 (AP1)", "Honda Prelude SH", "Acura Integra Type R (DC2)", "Acura RSX Type S",
-      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC",
-      "1995 Saturn SC2 (Flip-up headlights)"
+      "Nissan Z (RZ34)", "Toyota GR Supra (A90)", "Toyota GR Corolla",
+      "Honda Civic Type R (FK8)", "Honda Civic Type R (FL5)", "Toyota GR86",
+      "Subaru BRZ (Gen 2)", "Nissan GT-R (R35) Nismo", "Lexus LC500",
+      "Lexus RC F", "Acura NSX Type S (NC1)", "Mazda MX-5 Miata (ND2)",
+      "Subaru WRX (VB)", "Mitsubishi Lancer Evolution Final Edition"
     ]
   },
   {
-    category: "FWD Drag Monsters",
+    category: "Hot Hatches & Street Tuners",
     cars: [
-      "Honda Civic EG Hatch", "Honda Civic EK Coupe", "Honda CR-X Si",
-      "Dodge Neon SRT-4", "Chevrolet Cobalt SS Turbo", "Ford Focus SVT",
-      "Volkswagen GTI VR6", "Mazdaspeed 3", "Fiat 500 Abarth",
-      "2005 Saturn Ion Redline"
+      "Volkswagen Golf GTI (MK8)", "Volkswagen Golf R (MK8)", "Hyundai I30N",
+      "Ford Fiesta ST", "Ford Focus RS (MK3)", "Renault Megane RS Trophy",
+      "Mini John Cooper Works GP", "Audi RS3 (8V)", "Audi RS3 (8Y)",
+      "Mercedes-AMG A45 S", "BMW M135i", "Honda Civic Si (FE)",
+      "Mazdaspeed 3", "Dodge Neon SRT-4", "Chevrolet Cobalt SS Turbo",
+      "Saturn Ion Redline", "Eagle Talon TSi", "Mitsubishi Eclipse GSX (2G)"
     ]
   },
   {
-    category: "Classic American Muscle",
+    category: "Euro Luxury & Performance",
+    cars: [
+      "BMW M2 (G87)", "BMW M3 (G80)", "BMW M4 (G82)", "BMW M5 (F90) CS",
+      "BMW M8 Competition", "Porsche 911 GT3 RS (992)", "Porsche 911 Turbo S (992)",
+      "Porsche 718 Cayman GT4 RS", "Audi RS6 Avant", "Audi RS7 Performance",
+      "Audi R8 V10 Performance", "Mercedes-AMG GT Black Series", "Mercedes-AMG C63 S (W205)",
+      "Mercedes-AMG E63 S", "Alfa Romeo Giulia Quadrifoglio", "Maserati MC20",
+      "Jaguar F-Type SVR", "Aston Martin Vantage F1 Edition", "Bentley Continental GT Speed",
+      "Rolls-Royce Wraith Black Badge", "Cadillac CT5-V Blackwing"
+    ]
+  },
+  {
+    category: "American Muscle (Classics)",
     cars: [
       "1967 Ford Mustang Fastback", "1969 Ford Mustang Boss 429", "1965 Shelby Cobra 427",
-      "1969 Chevrolet Camaro SS", "1969 Chevrolet Camaro Z28",
-      "1970 Dodge Charger R/T", "1969 Dodge Charger Daytona",
-      "1970 Plymouth Hemi Cuda", "1970 Plymouth Superbird", "1970 Chevrolet Chevelle SS 454",
-      "1969 Pontiac GTO Judge", "1968 Dodge Dart Hemi Super Stock", "1970 Buick GSX",
-      "1969 Oldsmobile 442", "1957 Chevrolet Bel Air", "1965 Pontiac Catalina 2+2"
+      "1969 Chevrolet Camaro SS", "1970 Dodge Charger R/T", "1970 Plymouth Hemi Cuda",
+      "1970 Chevrolet Chevelle SS 454", "1969 Pontiac GTO Judge", "1968 Dodge Dart Hemi",
+      "1957 Chevrolet Bel Air", "1970 Plymouth Superbird", "1969 Dodge Charger Daytona",
+      "Buick Grand National", "Pontiac Firebird Trans Am (WS6)", "Chevrolet Corvette C4 ZR-1",
+      "Chevrolet Corvette C2 Stingray", "Shelby GT350 (1965)", "Mercury Cougar Eliminator"
     ]
   },
   {
-    category: "Modern American Muscle",
+    category: "American Muscle (Modern)",
     cars: [
       "Dodge Challenger SRT Demon 170", "Dodge Charger SRT Hellcat Redeye",
       "Ford Mustang Dark Horse", "Ford Mustang Shelby GT500 (S550)",
       "Chevrolet Camaro ZL1 1LE", "Chevrolet Corvette C8 Z06",
       "Chevrolet Corvette C7 ZR1", "Dodge Viper ACR Extreme",
-      "Cadillac CT5-V Blackwing", "Ford GT (2005)", "Ford GT (2017)"
+      "Cadillac CTS-V Wagon", "Ford GT (2017)", "Saleen S7 Twin Turbo"
     ]
   },
   {
-    category: "Drag Racing Specials",
+    category: "Heavy Hitters & Hypercars",
+    cars: [
+      "Lamborghini Huracan Sterrato", "Lamborghini Aventador SVJ", "Lamborghini Urus Performante",
+      "Ferrari 296 GTB", "Ferrari SF90 Stradale", "McLaren 720S", "McLaren 765LT",
+      "Rimac Nevera", "Lucid Air Sapphire", "Tesla Model S Plaid",
+      "Bugatti Chiron Super Sport", "Koenigsegg Jesko Attack", "Pagani Huayra BC",
+      "Hennessey Venom F5", "Rivian R1T (Dual Motor)", "GMC Syclone",
+      "Ford Lightning (F-150 SVT)", "Jeep Grand Cherokee Trackhawk"
+    ]
+  },
+  {
+    category: "Drag Racing & Vintage Gems",
     cars: [
       "Foxbody Mustang (Drag Spec)", "Chevrolet Nova (Big Tire)", "Willys Coupe Gasser",
       "Chevrolet S10 Drag Truck", "Top Fuel Dragster", "Nitro Funny Car",
-      "Pro Mod Chevrolet Camaro", "Twin Turbo Lamborghini Huracan", "Volkswagen Beetle (Drag Bug)"
-    ]
-  },
-  {
-    category: "Euro Performance",
-    cars: [
-      "Porsche 911 GT3 RS (992)", "Porsche 911 Turbo S (991)", "BMW M3 (E30)", "BMW M3 (E46)", "BMW M5 (E60 V10)",
-      "Audi RS6 Avant", "Audi R8 V10 Plus", "Volkswagen Golf GTI MK2", "Mercedes-Benz 190E Evolution II"
+      "Pro Mod Chevrolet Camaro", "Chevy Vega (Drag Spec)", "Ford Pinto (Drag Spec)",
+      "Volkswagen Beetle (Drag Bug)", "Lancia Delta Integrale", "Audi Quattro S1",
+      "Ford RS200", "Alpine A110 (Classic)", "DeLorean DMC-12", "Vector W8"
     ]
   }
 ];
@@ -209,6 +237,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
 
   const [useCarBuilder, setUseCarBuilder] = useState(true);
   const [useAdvancedPaint, setUseAdvancedPaint] = useState(false);
+  const [selectedForgeViews, setSelectedForgeViews] = useState<string[]>(['top-down', 'side', 'isometric']);
   
   const [carOptions, setCarOptions] = useState({
     generationMode: 'complete',
@@ -262,6 +291,16 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
 
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onConfigChange({ ...config, prompt: e.target.value });
+  };
+
+  const toggleForgeView = (viewId: string) => {
+    setSelectedForgeViews(prev => {
+      if (prev.includes(viewId)) {
+        return prev.filter(v => v !== viewId);
+      }
+      if (prev.length >= 3) return prev; // Limit to 3 at a time
+      return [...prev, viewId];
+    });
   };
 
   useEffect(() => {
@@ -369,15 +408,9 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
         >
           <div className="space-y-4">
              <div>
-                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Camera Angle</label>
+                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Camera Angle (Single Generation)</label>
                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { id: 'top-down', label: 'Top Down', icon: ArrowUp },
-                      { id: 'isometric', label: 'Isometric 2.5D', icon: Box },
-                      { id: 'side', label: 'Side Profile', icon: Layers },
-                      { id: 'front', label: 'Front View', icon: Eye },
-                      { id: 'rear', label: 'Rear View', icon: CircleDashed },
-                    ].map((view) => (
+                    {PERSPECTIVE_OPTIONS.map((view) => (
                       <button 
                         key={view.id}
                         onClick={() => onConfigChange({ ...config, perspective: view.id as any })}
@@ -568,28 +601,46 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
         </SidebarSection>
       </div>
 
-      <div className="p-4 border-t border-slate-900 bg-slate-950 z-10 space-y-2">
-        <button
-          onClick={() => onGenerate(false)}
-          disabled={isGenerating || !config.prompt}
-          className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-center gap-2
-            ${isGenerating || !config.prompt ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg'}
-          `}
-        >
-          {isGenerating ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-          Generate Asset
-        </button>
+      <div className="p-4 border-t border-slate-900 bg-slate-950 z-10 space-y-4">
+        <div>
+          <button
+            onClick={() => onGenerate(false)}
+            disabled={isGenerating || !config.prompt}
+            className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-center gap-2
+              ${isGenerating || !config.prompt ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg'}
+            `}
+          >
+            {isGenerating ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            Generate Single
+          </button>
+        </div>
 
-        <button
-          onClick={() => onGenerate(true)}
-          disabled={isGenerating || !config.prompt || config.type !== 'car'}
-          className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-center gap-2
-            ${isGenerating || !config.prompt || config.type !== 'car' ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-900/50 shadow-lg'}
-          `}
-        >
-          <Copy className="w-3.5 h-3.5" />
-          Forge Full Set (5 Views)
-        </button>
+        <div className="space-y-2">
+          <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-widest text-center">Set Forge Views (Max 3)</label>
+          <div className="flex justify-center gap-2">
+            {PERSPECTIVE_OPTIONS.map(view => (
+              <button
+                key={view.id}
+                onClick={() => toggleForgeView(view.id)}
+                className={`p-1.5 rounded-lg border transition-all ${selectedForgeViews.includes(view.id) ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-600 hover:text-slate-400'}`}
+                title={`Include ${view.label}`}
+              >
+                <view.icon className="w-4 h-4" />
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => onGenerate(true, selectedForgeViews)}
+            disabled={isGenerating || !config.prompt || config.type !== 'car' || selectedForgeViews.length === 0}
+            className={`w-full py-3 rounded-xl font-bold uppercase tracking-widest text-[11px] transition-all duration-300 flex items-center justify-center gap-2
+              ${isGenerating || !config.prompt || config.type !== 'car' || selectedForgeViews.length === 0 ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800' : 'bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-cyan-900/50 shadow-lg'}
+            `}
+          >
+            <Copy className="w-3.5 h-3.5" />
+            Forge Set ({selectedForgeViews.length})
+          </button>
+        </div>
       </div>
       
       <div onMouseDown={startResizing} className="absolute top-0 right-0 bottom-0 w-1 cursor-ew-resize hover:bg-cyan-500/50 transition-colors z-50" />

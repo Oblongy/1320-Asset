@@ -36,20 +36,20 @@ const App: React.FC = () => {
     localStorage.setItem('draggen-assets', JSON.stringify(assets));
   }, [assets]);
 
-  const handleGenerate = async (isSet: boolean = false) => {
+  const handleGenerate = async (isSet: boolean = false, selectedPerspectives?: string[]) => {
     if (!config.prompt.trim()) return;
 
     setIsGenerating(true);
     setError(null);
 
     try {
-      if (isSet) {
-        // Generate all perspectives sequentially for visual consistency
-        const views: GenerationConfig['perspective'][] = ['top-down', 'isometric', 'side', 'front', 'rear'];
+      if (isSet && selectedPerspectives && selectedPerspectives.length > 0) {
+        // Generate selected perspectives sequentially for visual consistency
+        const views = selectedPerspectives as GenerationConfig['perspective'][];
         setGenProgress({ current: 0, total: views.length });
         
         let referenceImageUrl: string | null = null;
-        let baseView: GenerationConfig['perspective'] = 'top-down';
+        let baseView: GenerationConfig['perspective'] = views[0];
 
         for (let i = 0; i < views.length; i++) {
           const targetView = views[i];
