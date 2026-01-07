@@ -99,30 +99,74 @@ const CAR_GROUPS = [
     cars: [
       "Nissan 350Z (Z33)", "Infiniti G35 Coupe", "Mazda MX-5 Miata (NA)", "Mazda MX-5 Miata (ND)",
       "Honda S2000 (AP1)", "Honda Prelude SH", "Acura Integra Type R (DC2)", "Acura RSX Type S",
-      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC"
+      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC",
+      "1995 Saturn SC2 (Flip-up headlights)"
     ]
   },
   {
-    category: "Muscle & Drag",
+    category: "FWD Drag Monsters",
     cars: [
-      "1969 Dodge Charger R/T", "1970 Plymouth Hemi Cuda", "1969 Chevrolet Camaro SS", 
-      "Foxbody Mustang", "Chevrolet Nova", "Willys Coupe Gasser"
+      "Honda Civic EG Hatch", "Honda Civic EK Coupe", "Honda CR-X Si",
+      "Dodge Neon SRT-4", "Chevrolet Cobalt SS Turbo", "Ford Focus SVT",
+      "Volkswagen GTI VR6", "Mazdaspeed 3", "Fiat 500 Abarth",
+      "2005 Saturn Ion Redline"
+    ]
+  },
+  {
+    category: "Classic American Muscle",
+    cars: [
+      "1967 Ford Mustang Fastback", "1969 Ford Mustang Boss 429", "1965 Shelby Cobra 427",
+      "1969 Chevrolet Camaro SS", "1969 Chevrolet Camaro Z28",
+      "1970 Dodge Charger R/T", "1969 Dodge Charger Daytona",
+      "1970 Plymouth Hemi Cuda", "1970 Plymouth Superbird", "1970 Chevrolet Chevelle SS 454",
+      "1969 Pontiac GTO Judge", "1968 Dodge Dart Hemi Super Stock", "1970 Buick GSX",
+      "1969 Oldsmobile 442", "1957 Chevrolet Bel Air", "1965 Pontiac Catalina 2+2"
+    ]
+  },
+  {
+    category: "Modern American Muscle",
+    cars: [
+      "Dodge Challenger SRT Demon 170", "Dodge Charger SRT Hellcat Redeye",
+      "Ford Mustang Dark Horse", "Ford Mustang Shelby GT500 (S550)",
+      "Chevrolet Camaro ZL1 1LE", "Chevrolet Corvette C8 Z06",
+      "Chevrolet Corvette C7 ZR1", "Dodge Viper ACR Extreme",
+      "Cadillac CT5-V Blackwing", "Ford GT (2005)", "Ford GT (2017)"
+    ]
+  },
+  {
+    category: "Drag Racing Specials",
+    cars: [
+      "Foxbody Mustang (Drag Spec)", "Chevrolet Nova (Big Tire)", "Willys Coupe Gasser",
+      "Chevrolet S10 Drag Truck", "Top Fuel Dragster", "Nitro Funny Car",
+      "Pro Mod Chevrolet Camaro", "Twin Turbo Lamborghini Huracan", "Volkswagen Beetle (Drag Bug)"
+    ]
+  },
+  {
+    category: "Euro Performance",
+    cars: [
+      "Porsche 911 GT3 RS (992)", "Porsche 911 Turbo S (991)", "BMW M3 (E30)", "BMW M3 (E46)", "BMW M5 (E60 V10)",
+      "Audi RS6 Avant", "Audi R8 V10 Plus", "Volkswagen Golf GTI MK2", "Mercedes-Benz 190E Evolution II"
     ]
   }
 ];
 
 const BODY_KITS = [
   'Stock Body', 'Widebody (Bolt-on)', 'Widebody (Molded)', 'Rocket Bunny Style', 'Liberty Walk Style',
-  'Pandem Widebody', 'Veilside Fortune', 'KBD Bodykit', 'Vertex Style', 'Bomex Aero'
+  'Pandem Widebody', 'Veilside Fortune', 'KBD Bodykit', 'Vertex Style', 'Bomex Aero',
+  'Rally Aero', 'Time Attack Aero', 'Dakar Rally Inspired', 'Canard & Winglets', 'Stealth Bomber',
+  'Cyberpunk Kit', 'Mad Max Armor'
 ];
 
 const LIVERIES = [
   'Clean (No Livery)', 'Dual Racing Stripes', 'Offset Stripe', 'Flames (Traditional)', 'Tribal Vinyl',
-  'Lightning Pattern', 'Sponsor Bomb (Logos)', 'Drift Livery'
+  'Lightning Pattern', 'Sponsor Bomb (Logos)', 'Drift Livery', 'Police Pursuit', 'Taxi Cab',
+  'Rusty Bucket', 'Itasha (Anime)', 'Geometric Camo', 'Digital Camo', 'Glitch Art', 
+  'Japanese Characters', 'Abstract Geometric', 'Retro Stripes'
 ];
 
 const ACCESSORIES = [
-  'None', 'Wheelie Bar', 'Parachute Pack', 'Dual Parachutes', 'Roof Rack', 'Exposed Intercooler'
+  'None', 'Wheelie Bar', 'Parachute Pack', 'Dual Parachutes', 'Roof Rack', 'Roof Scoop', 
+  'Exposed Intercooler', 'Tow Hook', 'Roll Cage (Visible)', 'Window Net'
 ];
 
 const SidebarSection: React.FC<{
@@ -364,7 +408,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
 
                 {useCarBuilder && (
                   <div className="space-y-5">
-                    {/* Color Section - NEW ADVANCED OPTION */}
+                    {/* Color Section */}
                     <div className="space-y-3">
                        <div className="flex items-center justify-between border-b border-slate-800 pb-1">
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
@@ -451,22 +495,49 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
 
                     <div className="space-y-3">
                        <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
-                         <Disc className="w-3.5 h-3.5 text-cyan-500" /> Wheels & Stance
+                         <Disc className="w-3.5 h-3.5 text-cyan-500" /> Wheels, Tires & Stance
                        </div>
+                       
                        <select value={carOptions.rims} onChange={(e) => setCarOptions({...carOptions, rims: e.target.value})} className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2">
                           {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
                        </select>
-                       <div className="grid grid-cols-2 gap-2">
-                          {RIM_DEPTH_OPTIONS.slice(0, 4).map((opt) => (
+
+                       <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Rim Depth</label>
+                       <div className="grid grid-cols-3 gap-2">
+                          {RIM_DEPTH_OPTIONS.map((opt) => (
                             <button
                               key={opt.id}
                               onClick={() => setCarOptions({...carOptions, dishDepth: opt.id})}
-                              className={`flex items-center gap-2 p-2 rounded-lg border text-[10px] transition-all ${carOptions.dishDepth === opt.id ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                              className={`flex flex-col items-center justify-center p-2 rounded-lg border text-[10px] transition-all ${carOptions.dishDepth === opt.id ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
                             >
-                              <opt.icon className="w-3 h-3" /> {opt.label}
+                              <opt.icon className="w-3 h-3 mb-1" />
+                              <span className="text-[8px] font-bold text-center leading-tight">{opt.label}</span>
                             </button>
                           ))}
                        </div>
+
+                       <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tire Fitment (Stance)</label>
+                       <div className="grid grid-cols-3 gap-2">
+                          {TIRE_FITMENT_OPTIONS.map((opt) => (
+                            <button
+                              key={opt.id}
+                              onClick={() => setCarOptions({...carOptions, fitment: opt.id})}
+                              className={`flex flex-col items-center justify-center p-2 rounded-lg border text-[10px] transition-all ${carOptions.fitment === opt.id ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                            >
+                              <opt.icon className="w-3 h-3 mb-1" />
+                              <span className="text-[8px] font-bold text-center leading-tight">{opt.label}</span>
+                            </button>
+                          ))}
+                       </div>
+
+                       <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Sidewall Profile</label>
+                       <select 
+                          value={carOptions.tireProfile}
+                          onChange={(e) => setCarOptions({...carOptions, tireProfile: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                        >
+                          {TIRE_PROFILE_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.label} ({s.desc})</option>)}
+                       </select>
                     </div>
                   </div>
                 )}
