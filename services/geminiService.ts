@@ -44,25 +44,27 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
   const { prompt, type, style, aspectRatio, perspective, hexColor } = config;
 
   const viewpointDescription = PERSPECTIVE_PROMPTS[perspective] || PERSPECTIVE_PROMPTS['top-down'];
-  const colorConstraint = hexColor ? `The PRIMARY PAINT COLOR of the subject MUST be exactly HEX CODE ${hexColor}. This is non-negotiable.` : "";
+  const colorConstraint = hexColor 
+    ? `COLOR LOCK: The primary paint/body color MUST be EXACTLY the hex color ${hexColor}. No variations in shade or tint.` 
+    : "";
 
   const systemContext = `
     You are an expert game artist specializing in creating 2D assets for racing games.
     Create an image based on the following requirements:
     1. Viewpoint: ${viewpointDescription}
-    2. Background: TRANSPARENT. The subject must be perfectly isolated.
+    2. Background: TRANSPARENT. The subject must be perfectly isolated on a solid white background (or alpha channel if supported).
     3. Subject: ${TYPE_PROMPTS[type]}
     4. Style: ${STYLE_PROMPTS[style]}
-    5. Color Lock: ${colorConstraint}
+    5. ${colorConstraint}
     6. Specific details: ${prompt}
     
-    Ensure the asset is centered and fully visible within the frame.
-    Output purely the subject. If the model cannot generate transparency, use a solid white background.
+    Ensure the asset is centered and fully visible within the frame. No cropping.
+    Output purely the subject.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [{ text: systemContext }],
       },
@@ -102,18 +104,20 @@ export const generateAssetWithReference = async (
   const { prompt, type, style, aspectRatio, hexColor } = config;
   const targetViewpointDesc = PERSPECTIVE_PROMPTS[targetPerspective];
   const baseViewpointDesc = PERSPECTIVE_PROMPTS[basePerspective];
-  const colorConstraint = hexColor ? `The PRIMARY PAINT COLOR MUST stay EXACTLY ${hexColor} across this new perspective.` : "";
+  const colorConstraint = hexColor 
+    ? `COLOR CONTINUITY: The body color MUST stay EXACTLY the hex color ${hexColor}. Reference the image for the specific car design but force the paint to match this hex.` 
+    : "Maintain the exact same colors and livery as the reference image.";
 
   const systemContext = `
     You are an expert game artist. Look at the provided reference image which shows a ${type} from a ${baseViewpointDesc} perspective.
     
-    TASK: Generate an EXACT visual duplicate of this ${type} but shown from a ${targetViewpointDesc} perspective.
+    TASK: Generate an EXACT visual duplicate of this specific ${type} but shown from a ${targetViewpointDesc} perspective.
     
     STRICT REQUIREMENTS:
-    1. Visual Continuity: Maintain the EXACT same color (USE HEX ${hexColor || 'FROM IMAGE'}), body kit parts, wheel style, liveries, and lighting as the reference image.
-    2. Color Lock: ${colorConstraint}
+    1. Visual Continuity: Maintain the EXACT same body kit parts, wheel style, and decals as the reference image.
+    2. ${colorConstraint}
     3. Viewpoint: ${targetViewpointDesc}
-    4. Background: TRANSPARENT.
+    4. Background: TRANSPARENT/SOLID WHITE. Isolated subject.
     5. Style: ${STYLE_PROMPTS[style]}
     6. Subject details: ${prompt}
     
@@ -122,7 +126,7 @@ export const generateAssetWithReference = async (
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           {
