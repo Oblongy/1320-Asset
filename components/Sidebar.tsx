@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu } from 'lucide-react';
+import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer } from 'lucide-react';
 import { ArtStyle, AssetType, GenerationConfig } from '../types';
 
 interface SidebarProps {
@@ -42,18 +42,6 @@ const PAINT_FINISHES = [
   'Color Shift / Chameleon', 'Carbon Fiber Wrap', 'Rusty / Patina', 'Camo Wrap'
 ];
 
-const ENGINE_TYPES = [
-  'V8 Big Block', 'V8 Small Block (LS)', 'Inline-4', 'Inline-6 (2JZ/RB)', 'V6 Twin Turbo', 
-  'V10', 'V12', 'Rotary (13B)', 'Rotary (20B)', 'Flat-4 (Boxer)', 'Flat-6', 
-  'Electric Motor', 'Jet Turbine'
-];
-
-const ENGINE_COMPONENTS = [
-  'Stock / Hidden', 'Roots Supercharger (Blower)', 'Twin Turbochargers', 'Single Huge Turbo', 
-  'Velocity Stacks', 'Exhaust Headers (Up-swept)', 'Individual Throttle Bodies (ITBs)', 
-  'Centrifugal Supercharger', 'Nitrous Oxide System', 'Intercooler Piping', 'Gold Heat Shielding'
-];
-
 const RIM_STYLES = [
   // Racing / Performance
   'TE37 Style (6-Spoke)', 'RPF1 Style (Twin Spoke)', 'Work Meister (Deep Dish)', 'CE28 Style (Multi-spoke)', 'Advan 3-Spoke',
@@ -81,6 +69,30 @@ const CAR_GROUPS = [
       "Nissan 180SX Type X", "Honda S2000 CR", "Toyota AE86 Sprinter Trueno",
       "Mazda RX-7 FC3S", "Mitsubishi 3000GT VR-4", "Toyota Celica GT-Four ST205",
       "Honda Integra Type R DC2", "Honda Civic Type R EK9"
+    ]
+  },
+  {
+    category: "Street Tuner Heroes",
+    cars: [
+      "Nissan 350Z (Z33)", "Infiniti G35 Coupe", "Mazda MX-5 Miata (NA)", "Mazda MX-5 Miata (ND)",
+      "Honda S2000 (AP1)", "Honda Prelude SH", "Acura Integra Type R (DC2)", "Acura RSX Type S",
+      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC"
+    ]
+  },
+  {
+    category: "FWD Drag Monsters",
+    cars: [
+      "Honda Civic EG Hatch", "Honda Civic EK Coupe", "Honda CR-X Si",
+      "Dodge Neon SRT-4", "Chevrolet Cobalt SS Turbo", "Ford Focus SVT",
+      "Volkswagen GTI VR6", "Mazdaspeed 3", "Fiat 500 Abarth"
+    ]
+  },
+  {
+    category: "VIP & Luxury Cruisers",
+    cars: [
+      "Lexus LS400", "Lexus GS300", "Toyota Chaser JZX100", "Nissan Cedric",
+      "Mercedes-Benz S600 (W140)", "BMW 750iL (E38)", "Bentley Continental GT",
+      "Chrysler 300C SRT8", "Cadillac Escalade"
     ]
   },
   {
@@ -167,7 +179,7 @@ const CAR_GROUPS = [
     cars: [
       "Honda Civic Hatchback", "Toyota Corolla Hatchback", "Volkswagen Golf TSI", 
       "Mazda 3 Hatchback", "Ford Focus ST", "Ford Fiesta ST", 
-      "Mini Cooper S", "Fiat 500 Abarth", "Hyundai Veloster N", 
+      "Mini Cooper S", "Hyundai Veloster N", 
       "Chevrolet Spark", "Nissan Versa Note", "Honda Fit"
     ]
   },
@@ -224,6 +236,7 @@ const CAR_GROUPS = [
 
 const BODY_KITS = [
   'Stock Body', 'Widebody (Bolt-on)', 'Widebody (Molded)', 'Rocket Bunny Style', 'Liberty Walk Style',
+  'Pandem Widebody', 'Veilside Fortune', 'KBD Bodykit', 'Vertex Style', 'Bomex Aero',
   'Rally Aero', 'Time Attack Aero', 'Dakar Rally Inspired', 'Canard & Winglets', 'Stealth Bomber',
   'Cyberpunk Kit', 'Mad Max Armor'
 ];
@@ -256,12 +269,40 @@ const LIVERIES = [
 ];
 
 const UNDERGLOW = ['None', 'Neon Blue', 'Neon Red', 'Neon Green', 'Neon Purple', 'Neon White', 'Pulsing RGB'];
-const ACTION_FX = ['Static / Clean', 'Tire Smoke (Burnout)', 'Exhaust Flames', 'Nitro Flames (Blue)', 'Motion Blur', 'Drifting Smoke'];
 
-// Track Builder Constants (Keep these simpler)
+const ACTION_FX = [
+  'Static / Clean', 
+  'Subtle Heat Haze', 
+  'Faint Dust Particles', 
+  'Light Tire Smoke',
+  'Heavy Tire Smoke (Burnout)', 
+  'Exhaust Flames', 
+  'Nitro Flames (Blue)', 
+  'Motion Blur', 
+  'Drifting Smoke'
+];
+
+// Track Builder Constants
 const TRACK_SEGMENTS = ['Straight Road', 'Slight Curve Left', 'Slight Curve Right', 'Sharp Turn', 'Start Line', 'Finish Line', 'Staging Area'];
 const TRACK_SURFACES = ['Dark Asphalt', 'Grey Concrete', 'Dirt / Gravel', 'Wet Tarmac', 'Neon Grid', 'Ice / Snow'];
 const TRACK_ENVIRONMENTS = ['Pro Stadium', 'Desert Highway', 'City Street Night', 'Forest Road', 'Industrial Zone', 'Sci-Fi Tunnel'];
+
+// UI Builder Constants
+const UI_ELEMENT_TYPES = [
+  'Button (Start)', 'Button (Options)', 'Icon (Nitrous)', 'Icon (Engine)', 'Icon (Tires)', 
+  'Speedometer (Analog)', 'Speedometer (Digital)', 'Tachometer', 'Gear Indicator',
+  'Progress Bar (Fuel)', 'Progress Bar (Boost)', 'Game HUD Panel', 'Minimap Frame', 
+  'Victory Banner', 'Defeat Banner'
+];
+
+const UI_THEMES = [
+  'Sci-Fi / Holographic', 'Retro Pixel (8-bit)', 'Modern Minimal', 'Grunge / Rusty Metal', 
+  'Neon Cyberpunk', 'Carbon Fiber & Chrome', 'Flat Vector', 'Glassmorphism'
+];
+
+const UI_SHAPES = [
+  'Rectangle', 'Rounded Rectangle', 'Circle / Gauge', 'Hexagon', 'Octagon', 'Complex Tech Shape'
+];
 
 // Reusable Section Component
 const SidebarSection: React.FC<{
@@ -311,8 +352,6 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     bodyKit: 'Stock Body',
     hood: 'Stock Hood',
     spoiler: 'No Spoiler',
-    engineType: 'V8 Big Block',
-    engineComponent: 'Stock / Hidden',
     exhaust: 'Stock Hidden',
     rims: 'TE37 Style (6-Spoke)',
     tires: 'Street Performance',
@@ -329,6 +368,15 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     segment: 'Straight Road',
     surface: 'Dark Asphalt',
     environment: 'Pro Stadium',
+  });
+  
+  // UI Builder State
+  const [useUiBuilder, setUseUiBuilder] = useState(true);
+  const [uiOptions, setUiOptions] = useState({
+    elementType: 'Speedometer (Analog)',
+    theme: 'Neon Cyberpunk',
+    shape: 'Circle / Gauge',
+    primaryColor: 'Cyan'
   });
   
   // Resize Logic
@@ -368,7 +416,6 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
       const parts = [
         `Subject: ${carOptions.body}.`,
         `Paint: ${carOptions.color} paint with a ${carOptions.finish} finish.`,
-        `Engine: ${carOptions.engineType}${carOptions.engineComponent !== 'Stock / Hidden' ? ` featuring a visible ${carOptions.engineComponent}` : ''}.`,
         `Wheels: ${carOptions.rims} rims with ${carOptions.tires}.`,
         `Modifications: ${carOptions.bodyKit} body kit, ${carOptions.hood}, ${carOptions.spoiler}, and ${carOptions.exhaust}.`,
         carOptions.accessory !== 'None' ? `Accessory: ${carOptions.accessory}.` : '',
@@ -395,6 +442,21 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
       onConfigChange({ ...config, prompt: parts.join(' ') });
     }
   }, [trackOptions, useTrackBuilder, config.type, config.perspective]);
+
+  // Update prompt for UI Builder
+  useEffect(() => {
+    if (config.type === 'ui' && useUiBuilder) {
+        const parts = [
+            `Game UI Asset: ${uiOptions.elementType}.`,
+            `Style: ${uiOptions.theme}.`,
+            `Shape: ${uiOptions.shape}.`,
+            `Color Theme: ${uiOptions.primaryColor}.`,
+            `View: Front facing flat UI element.`,
+            'High quality game interface design, isolated on transparent background.'
+        ];
+        onConfigChange({ ...config, prompt: parts.join(' ') });
+    }
+  }, [uiOptions, useUiBuilder, config.type]);
 
   return (
     <div 
@@ -521,10 +583,10 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
         </SidebarSection>
 
         {/* SECTION 3: BUILDER (Dynamic) */}
-        {(config.type === 'car' || config.type === 'track') && (
+        {(config.type === 'car' || config.type === 'track' || config.type === 'ui') && (
           <SidebarSection 
-            title={config.type === 'car' ? 'Vehicle Forge' : 'Track Architect'} 
-            icon={config.type === 'car' ? Wrench : Flag}
+            title={config.type === 'car' ? 'Vehicle Forge' : config.type === 'track' ? 'Track Architect' : 'Interface Designer'} 
+            icon={config.type === 'car' ? Wrench : config.type === 'track' ? Flag : MousePointer}
             isOpen={sections.builder}
             onToggle={() => toggleSection('builder')}
           >
@@ -614,29 +676,6 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                               >
                                 {SPOILER_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
-                         </div>
-                      </div>
-
-                      {/* 3. Engine Bay (New) */}
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
-                           <Cpu className="w-3.5 h-3.5 text-cyan-500" /> Engine Bay
-                         </div>
-                         <div className="grid grid-cols-1 gap-2">
-                           <select 
-                              value={carOptions.engineType}
-                              onChange={(e) => setCarOptions({...carOptions, engineType: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {ENGINE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                           <select 
-                              value={carOptions.engineComponent}
-                              onChange={(e) => setCarOptions({...carOptions, engineComponent: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {ENGINE_COMPONENTS.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
                          </div>
                       </div>
 
@@ -768,6 +807,79 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                   )}
                </div>
              )}
+
+             {config.type === 'ui' && (
+               <div className="space-y-4">
+                  <div className="flex justify-end">
+                    <button 
+                      onClick={() => setUseUiBuilder(!useUiBuilder)}
+                      className="text-[10px] font-bold text-cyan-600 hover:text-cyan-400 uppercase tracking-wider flex items-center gap-1"
+                    >
+                      {useUiBuilder ? 'Manual Mode' : 'Builder Mode'} <Terminal className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  {useUiBuilder ? (
+                    <div className="space-y-5 animate-in fade-in">
+                      {/* Element Type */}
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Element Type</label>
+                        <select 
+                          value={uiOptions.elementType}
+                          onChange={(e) => setUiOptions({...uiOptions, elementType: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                        >
+                           {UI_ELEMENT_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Theme */}
+                      <div>
+                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Theme & Style</label>
+                         <select 
+                          value={uiOptions.theme}
+                          onChange={(e) => setUiOptions({...uiOptions, theme: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                        >
+                           {UI_THEMES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+
+                      {/* Shape */}
+                      <div>
+                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Shape</label>
+                         <select 
+                          value={uiOptions.shape}
+                          onChange={(e) => setUiOptions({...uiOptions, shape: e.target.value})}
+                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                        >
+                           {UI_SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </div>
+
+                       {/* Colors */}
+                      <div>
+                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Primary Color</label>
+                         <div className="flex flex-wrap gap-1.5">
+                            {CAR_COLORS.map((c) => (
+                              <button
+                                key={c.name}
+                                onClick={() => setUiOptions({...uiOptions, primaryColor: c.name})}
+                                title={c.name}
+                                style={{ backgroundColor: c.hex }}
+                                className={`w-5 h-5 rounded-sm ring-1 ring-slate-900 transition-all ${uiOptions.primaryColor === c.name ? 'ring-2 ring-white scale-110 z-10' : 'hover:scale-110'}`}
+                              />
+                            ))}
+                         </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-slate-500 italic p-4 border border-dashed border-slate-800 rounded-lg text-center bg-slate-900/30">
+                      Manual prompt mode enabled. Use the description box below.
+                    </div>
+                  )}
+               </div>
+             )}
           </SidebarSection>
         )}
 
@@ -786,9 +898,9 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                 <textarea
                   value={config.prompt}
                   onChange={handlePromptChange}
-                  readOnly={(config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder)}
+                  readOnly={(config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder) || (config.type === 'ui' && useUiBuilder)}
                   placeholder="Asset description..."
-                  className={`w-full h-24 bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-lg focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 p-3 resize-none custom-scrollbar ${((config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder)) ? 'opacity-70 cursor-not-allowed bg-slate-950' : ''}`}
+                  className={`w-full h-24 bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-lg focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 p-3 resize-none custom-scrollbar ${((config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder) || (config.type === 'ui' && useUiBuilder)) ? 'opacity-70 cursor-not-allowed bg-slate-950' : ''}`}
                 />
              </div>
              
