@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2, MoveHorizontal, AlignJustify, Square, Hash, Type, Activity, Copy, ShieldCheck, BoxSelect, Eraser } from 'lucide-react';
-import { ArtStyle, AssetType, GenerationConfig } from '../types';
+import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2, MoveHorizontal, AlignJustify, Square, Hash, Type, Activity, Copy, ShieldCheck, BoxSelect, Eraser, Activity as SuspensionIcon } from 'lucide-react';
+import { ArtStyle, AssetType, GenerationConfig, WheelWellDetail } from '../types';
 
 interface SidebarProps {
   config: GenerationConfig;
@@ -453,17 +453,42 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                 </button>
 
                 {config.perspective === 'side' && (
-                  <button 
-                    onClick={() => onConfigChange({ ...config, renderWheelWells: !config.renderWheelWells })}
-                    className={`w-full flex items-center justify-between p-2 rounded-lg border text-[10px] font-bold transition-all uppercase tracking-widest ${config.renderWheelWells ? 'bg-indigo-950/40 border-indigo-500/50 text-indigo-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
-                  >
-                    <div className="flex items-center gap-2">
-                        <Eraser className="w-3 h-3" /> Wheel Well Masking
-                    </div>
-                    <div className={`w-8 h-4 rounded-full relative transition-colors ${config.renderWheelWells ? 'bg-indigo-500' : 'bg-slate-700'}`}>
-                        <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${config.renderWheelWells ? 'left-4.5' : 'left-0.5'}`} />
-                    </div>
-                  </button>
+                  <div className="space-y-3 p-2 rounded-lg border border-slate-800 bg-slate-900/50">
+                    <button 
+                      onClick={() => onConfigChange({ ...config, renderWheelWells: !config.renderWheelWells })}
+                      className={`w-full flex items-center justify-between text-[10px] font-bold transition-all uppercase tracking-widest ${config.renderWheelWells ? 'text-indigo-400' : 'text-slate-500'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                          <Eraser className="w-3 h-3" /> Wheel Well Masking
+                      </div>
+                      <div className={`w-8 h-4 rounded-full relative transition-colors ${config.renderWheelWells ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                          <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${config.renderWheelWells ? 'left-4.5' : 'left-0.5'}`} />
+                      </div>
+                    </button>
+                    
+                    {config.renderWheelWells && (
+                      <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                        <label className="block text-[8px] font-bold text-slate-600 uppercase tracking-tighter">Mask Internal Detail</label>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {[
+                            { id: 'basic', label: 'Basic', icon: Circle, desc: 'Empty Shadow' },
+                            { id: 'rotors', label: 'Rotors', icon: Disc, desc: 'Brakes/Caliper' },
+                            { id: 'full', label: 'Mechanical', icon: SuspensionIcon, desc: 'Full Suspension' }
+                          ].map((detail) => (
+                            <button
+                              key={detail.id}
+                              onClick={() => onConfigChange({ ...config, wheelWellDetail: detail.id as WheelWellDetail })}
+                              className={`flex flex-col items-center justify-center p-1.5 rounded border text-[9px] transition-all ${config.wheelWellDetail === detail.id ? 'bg-indigo-950/40 border-indigo-500/50 text-indigo-300' : 'bg-slate-800 border-slate-700 text-slate-500'}`}
+                              title={detail.desc}
+                            >
+                              <detail.icon className="w-3 h-3 mb-1" />
+                              <span className="font-bold">{detail.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
              </div>
           </div>

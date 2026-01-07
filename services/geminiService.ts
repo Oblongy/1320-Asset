@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { ArtStyle, AssetType, GenerationConfig } from "../types";
+import { ArtStyle, AssetType, GenerationConfig, WheelWellDetail } from "../types";
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -33,6 +33,12 @@ const PERSPECTIVE_PROMPTS: Record<string, string> = {
   'rear': "Direct Rear View, showing the taillights, exhaust, and VERY VISIBLE wide rear drag tires.",
 };
 
+const WHEEL_WELL_DETAIL_PROMPTS: Record<WheelWellDetail, string> = {
+  basic: "The wheel wells should be simple, dark, and shadowed voids behind the tires.",
+  rotors: "Inside the wheel wells, render high-performance drilled and slotted brake rotors with large, visible multi-piston brake calipers.",
+  full: "Inside the wheel wells, provide full mechanical detail: large brake rotors, brightly colored calipers, visible coilover suspension, springs, and control arms."
+};
+
 /**
  * Extracts base64 data from a data URL
  */
@@ -41,7 +47,7 @@ const getBase64FromDataUrl = (dataUrl: string) => {
 };
 
 export const generateAsset = async (config: GenerationConfig): Promise<string> => {
-  const { prompt, type, style, aspectRatio, perspective, hexColor, renderWheelWells, groundShadow } = config;
+  const { prompt, type, style, aspectRatio, perspective, hexColor, renderWheelWells, wheelWellDetail, groundShadow } = config;
 
   const viewpointDescription = PERSPECTIVE_PROMPTS[perspective] || PERSPECTIVE_PROMPTS['top-down'];
   const colorConstraint = hexColor 
@@ -49,7 +55,7 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
     : "";
 
   const maskingInstruction = renderWheelWells && perspective === 'side' 
-    ? "WHEEL MASKING: Ensure the wheel wells behind the tires are fully rendered with mechanical detail (brake rotors, suspension parts) so that if wheels are removed, the area is not transparent." 
+    ? `WHEEL MASKING: ${WHEEL_WELL_DETAIL_PROMPTS[wheelWellDetail || 'basic']} This area must be fully rendered so it is not transparent if wheels are removed.` 
     : "";
 
   const shadowInstruction = groundShadow 
@@ -113,12 +119,12 @@ export const generateAssetWithReference = async (
   basePerspective: string,
   config: GenerationConfig
 ): Promise<string> => {
-  const { prompt, type, style, aspectRatio, hexColor, renderWheelWells, groundShadow } = config;
+  const { prompt, type, style, aspectRatio, hexColor, renderWheelWells, wheelWellDetail, groundShadow } = config;
   const targetViewpointDesc = PERSPECTIVE_PROMPTS[targetPerspective];
   const baseViewpointDesc = PERSPECTIVE_PROMPTS[basePerspective];
   
   const maskingInstruction = renderWheelWells && targetPerspective === 'side' 
-    ? "Ensure wheel wells behind tires are rendered with detail." 
+    ? `WHEEL MASKING: ${WHEEL_WELL_DETAIL_PROMPTS[wheelWellDetail || 'basic']}` 
     : "";
 
   const shadowInstruction = groundShadow 

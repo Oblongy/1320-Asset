@@ -2,6 +2,8 @@ export type AssetType = 'car' | 'track' | 'prop' | 'ui';
 
 export type ArtStyle = 'pixel' | 'vector' | 'realistic' | 'sketch' | 'blueprint' | 'neon' | 'lowpoly' | 'celshaded' | 'vaporwave' | 'watercolor' | 'oil' | 'marker';
 
+export type WheelWellDetail = 'basic' | 'rotors' | 'full';
+
 export interface GeneratedAsset {
   id: string;
   imageUrl: string;
@@ -19,6 +21,7 @@ export interface GenerationConfig {
   perspective: 'top-down' | 'isometric' | 'side' | 'front' | 'rear';
   hexColor?: string;
   renderWheelWells?: boolean;
+  wheelWellDetail?: WheelWellDetail;
   groundShadow?: boolean;
 }
 
