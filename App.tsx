@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Rocket, Github, Info, Layers } from 'lucide-react';
+import { Rocket, Github, Info, Layers, Image as ImageIcon, PenTool } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import AssetGallery from './components/AssetGallery';
+import Workbench from './components/Workbench';
 import { generateAsset } from './services/geminiService';
 import { GeneratedAsset, GenerationConfig } from './types';
 
@@ -17,6 +18,7 @@ const App: React.FC = () => {
   const [assets, setAssets] = useState<GeneratedAsset[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentView, setCurrentView] = useState<'gallery' | 'workbench'>('gallery');
 
   // Load from local storage on mount
   useEffect(() => {
@@ -89,12 +91,26 @@ const App: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-4 text-sm text-slate-400">
-             <div className="hidden md:flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full border border-slate-700">
+          <div className="flex items-center gap-6">
+            <div className="flex bg-slate-900/50 p-1 rounded-lg border border-slate-800">
+               <button 
+                  onClick={() => setCurrentView('gallery')}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'gallery' ? 'bg-slate-800 text-cyan-400 shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                  <ImageIcon className="w-4 h-4" /> Gallery
+               </button>
+               <button 
+                  onClick={() => setCurrentView('workbench')}
+                  className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all ${currentView === 'workbench' ? 'bg-slate-800 text-cyan-400 shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}
+               >
+                  <PenTool className="w-4 h-4" /> Workbench
+               </button>
+            </div>
+            
+             <div className="hidden md:flex items-center gap-1 bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-sm text-slate-400">
                <Layers className="w-3 h-3 text-cyan-500" />
                <span>Model: Gemini 2.5 Flash</span>
              </div>
-            <a href="#" className="hover:text-cyan-400 transition-colors"><Github className="w-5 h-5" /></a>
           </div>
         </header>
 
@@ -109,7 +125,11 @@ const App: React.FC = () => {
 
         {/* Canvas / Gallery Area */}
         <main className="flex-1 overflow-hidden relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
-          <AssetGallery assets={assets} onDelete={handleDelete} />
+          {currentView === 'gallery' ? (
+             <AssetGallery assets={assets} onDelete={handleDelete} />
+          ) : (
+             <Workbench assets={assets} />
+          )}
         </main>
       </div>
     </div>

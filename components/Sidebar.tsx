@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer } from 'lucide-react';
+import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2 } from 'lucide-react';
 import { ArtStyle, AssetType, GenerationConfig } from '../types';
 
 interface SidebarProps {
@@ -46,11 +46,11 @@ const RIM_STYLES = [
   // Racing / Performance
   'TE37 Style (6-Spoke)', 'RPF1 Style (Twin Spoke)', 'Work Meister (Deep Dish)', 'CE28 Style (Multi-spoke)', 'Advan 3-Spoke',
   // Drag Specific
-  'Weld Racing (Magnum)', 'Drag Star (5-Spoke)', 'Beadlock Drag', 'Solid Disc (Aero)', 'Skinny Front Runners',
+  'Weld Racing (Magnum)', 'Drag Star (5-Spoke)', 'Beadlock Drag', 'Solid Disc (Aero)', 'Skinny Front Runners', 'Centerline Convo Pro',
   // Classic / Muscle
   'Cragar S/S', 'Torq Thrust', 'Steelies (Black)', 'Steelies (Chrome Hub)', 'Wire Spoke (Dayton)', 'Rallye Wheels',
   // Modern / Euro
-  'Rotiform Aerodisc', 'BBS Mesh (RS)', 'Turbofan', 'Concave 5-Spoke', 'Split 5-Spoke',
+  'Rotiform Aerodisc', 'BBS Mesh (RS)', 'Turbofan', 'Concave 5-Spoke', 'Split 5-Spoke', 'ASANTI AF141',
   // Wild
   'Spinner Rims', 'Neon Light-Up', 'Transparent/Glass', 'Gold Plated'
 ];
@@ -76,7 +76,8 @@ const CAR_GROUPS = [
     cars: [
       "Nissan 350Z (Z33)", "Infiniti G35 Coupe", "Mazda MX-5 Miata (NA)", "Mazda MX-5 Miata (ND)",
       "Honda S2000 (AP1)", "Honda Prelude SH", "Acura Integra Type R (DC2)", "Acura RSX Type S",
-      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC"
+      "Mitsubishi Eclipse GSX (2G)", "Toyota MR2 Turbo (SW20)", "Subaru BRZ (Gen 1)", "Scion tC",
+      "1995 Saturn SC2 (Flip-up headlights)"
     ]
   },
   {
@@ -84,7 +85,8 @@ const CAR_GROUPS = [
     cars: [
       "Honda Civic EG Hatch", "Honda Civic EK Coupe", "Honda CR-X Si",
       "Dodge Neon SRT-4", "Chevrolet Cobalt SS Turbo", "Ford Focus SVT",
-      "Volkswagen GTI VR6", "Mazdaspeed 3", "Fiat 500 Abarth"
+      "Volkswagen GTI VR6", "Mazdaspeed 3", "Fiat 500 Abarth",
+      "2005 Saturn Ion Redline"
     ]
   },
   {
@@ -346,6 +348,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
   // Car Builder State
   const [useCarBuilder, setUseCarBuilder] = useState(true);
   const [carOptions, setCarOptions] = useState({
+    generationMode: 'complete', // 'complete', 'body', 'wheel', 'spoiler'
     color: 'Red',
     finish: 'Gloss (Standard)',
     body: 'Nissan Skyline GT-R R34 V-Spec',
@@ -359,7 +362,8 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     accessory: 'None',
     underglow: 'None',
     fx: 'Static / Clean',
-    tint: 'Dark Smoke'
+    tint: 'Dark Smoke',
+    wheelbase: 30 // Default Standard
   });
 
   // Track Builder State
@@ -413,18 +417,78 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
   // Update prompt for Car Builder
   useEffect(() => {
     if (config.type === 'car' && useCarBuilder) {
-      const parts = [
-        `Subject: ${carOptions.body}.`,
-        `Paint: ${carOptions.color} paint with a ${carOptions.finish} finish.`,
-        `Wheels: ${carOptions.rims} rims with ${carOptions.tires}.`,
-        `Modifications: ${carOptions.bodyKit} body kit, ${carOptions.hood}, ${carOptions.spoiler}, and ${carOptions.exhaust}.`,
-        carOptions.accessory !== 'None' ? `Accessory: ${carOptions.accessory}.` : '',
-        carOptions.livery !== 'Clean (No Livery)' ? `Livery: ${carOptions.livery}.` : '',
-        carOptions.underglow !== 'None' ? `Underglow: ${carOptions.underglow}.` : '',
-        carOptions.fx !== 'Static / Clean' ? `Effect: ${carOptions.fx}.` : '',
-        `View: ${config.perspective}.`,
-        'Style: 2D game asset, high definition, photorealistic textures, isolated on transparent background.'
-      ];
+      let parts: string[] = [];
+      const view = config.perspective;
+      const baseStyle = 'Style: 2D game asset, high definition, photorealistic textures, isolated on transparent background.';
+
+      const getWheelbaseDescription = (val: number) => {
+        if (val < 25) return "very short wheelbase, compact chassis";
+        if (val < 50) return "standard factory wheelbase spacing";
+        if (val < 75) return "extended wheelbase, stretched chassis spacing";
+        return "extreme long wheelbase, pro mod dragster style stretched wheel spacing";
+      };
+
+      const wheelbaseDesc = getWheelbaseDescription(carOptions.wheelbase);
+
+      if (carOptions.generationMode === 'complete') {
+        parts = [
+            `Subject: ${carOptions.body}.`,
+            `Dimensions: ${wheelbaseDesc}.`,
+            `Paint: ${carOptions.color} paint with a ${carOptions.finish} finish.`,
+            `Wheels: ${carOptions.rims} rims with ${carOptions.tires}.`,
+            `Modifications: ${carOptions.bodyKit} body kit, ${carOptions.hood}, ${carOptions.spoiler}, and ${carOptions.exhaust}.`,
+            carOptions.accessory !== 'None' ? `Accessory: ${carOptions.accessory}.` : '',
+            carOptions.livery !== 'Clean (No Livery)' ? `Livery: ${carOptions.livery}.` : '',
+            carOptions.underglow !== 'None' ? `Underglow: ${carOptions.underglow}.` : '',
+            carOptions.fx !== 'Static / Clean' ? `Effect: ${carOptions.fx}.` : '',
+            `View: ${view}.`,
+            baseStyle
+          ];
+      } else if (carOptions.generationMode === 'body') {
+          parts = [
+            `Subject: ${carOptions.body} Car Body Chassis ONLY.`,
+            `Condition: No wheels, empty wheel wells, floating chassis.`,
+            `Dimensions: ${wheelbaseDesc}.`,
+            `Paint: ${carOptions.color} paint with a ${carOptions.finish} finish.`,
+            `Modifications: ${carOptions.bodyKit} body kit, ${carOptions.hood}.`,
+            carOptions.livery !== 'Clean (No Livery)' ? `Livery: ${carOptions.livery}.` : '',
+            `View: ${view}.`,
+            baseStyle
+          ];
+      } else if (carOptions.generationMode === 'wheel') {
+          parts = [
+            `Subject: Single Car Wheel and Tire.`,
+            `Rim: ${carOptions.rims}, color ${carOptions.finish}.`,
+            `Tire: ${carOptions.tires}.`,
+            `View: ${view === 'top-down' ? 'Top-down view of tire tread and shoulder' : 'Side profile of rim and tire sidewall'}.`,
+            `Effect: ${carOptions.fx !== 'Static / Clean' ? carOptions.fx : 'Clean studio lighting'}.`,
+            baseStyle
+          ];
+      } else if (carOptions.generationMode === 'rim') {
+           parts = [
+            `Subject: Single Car Wheel Rim (No Tire).`,
+            `Style: ${carOptions.rims}.`,
+            `Color: ${carOptions.color} ${carOptions.finish}.`,
+            `View: ${view === 'top-down' ? 'Top-down view of rim face' : 'Side profile of rim'}.`,
+            baseStyle
+          ];
+      } else if (carOptions.generationMode === 'tire') {
+           parts = [
+            `Subject: Single Car Tire (Rubber only, empty center).`,
+            `Type: ${carOptions.tires}.`,
+            `View: ${view === 'top-down' ? 'Top-down view of tire tread' : 'Side profile of tire sidewall'}.`,
+            baseStyle
+          ];
+      } else if (carOptions.generationMode === 'spoiler') {
+           parts = [
+            `Subject: Car Spoiler / Wing (Component).`,
+            `Style: ${carOptions.spoiler}.`,
+            `Color: ${carOptions.color} ${carOptions.finish}.`,
+            `View: ${view}.`,
+            baseStyle
+          ];
+      }
+
       onConfigChange({ ...config, prompt: parts.filter(p => p).join(' ') });
     }
   }, [carOptions, useCarBuilder, config.type, config.perspective]);
@@ -592,115 +656,169 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
           >
              {config.type === 'car' && (
                <div className="space-y-4">
-                  <div className="flex justify-end">
+                  <div className="flex justify-between items-center">
+                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Generation Mode</label>
                     <button 
                       onClick={() => setUseCarBuilder(!useCarBuilder)}
                       className="text-[10px] font-bold text-cyan-600 hover:text-cyan-400 uppercase tracking-wider flex items-center gap-1"
                     >
-                      {useCarBuilder ? 'Manual Mode' : 'Builder Mode'} <Terminal className="w-3 h-3" />
+                      {useCarBuilder ? 'Manual Prompt' : 'Builder Mode'} <Terminal className="w-3 h-3" />
                     </button>
                   </div>
 
                   {useCarBuilder ? (
                     <div className="space-y-5 animate-in fade-in">
-                      {/* 1. Paint & Body */}
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
-                           <Palette className="w-3.5 h-3.5 text-cyan-500" /> Paint & Finish
-                         </div>
-                         
-                         {/* Color Grid */}
-                         <div className="flex flex-wrap gap-1.5">
-                            {CAR_COLORS.map((c) => (
-                              <button
-                                key={c.name}
-                                onClick={() => setCarOptions({...carOptions, color: c.name})}
-                                title={c.name}
-                                style={{ backgroundColor: c.hex }}
-                                className={`w-5 h-5 rounded-sm ring-1 ring-slate-900 transition-all ${carOptions.color === c.name ? 'ring-2 ring-white scale-110 z-10' : 'hover:scale-110'}`}
+                       {/* MODE SELECTOR */}
+                       <div className="grid grid-cols-2 gap-2 mb-2">
+                          {[
+                              { id: 'complete', label: 'Full Vehicle', icon: Car },
+                              { id: 'body', label: 'Body Only', icon: Component },
+                              { id: 'wheel', label: 'Wheel & Tire', icon: Disc },
+                              { id: 'rim', label: 'Rim Only', icon: CircleDashed },
+                              { id: 'tire', label: 'Tire Only', icon: Circle },
+                              { id: 'spoiler', label: 'Spoiler', icon: Wind }
+                          ].map((mode) => (
+                             <button
+                                key={mode.id}
+                                onClick={() => setCarOptions({...carOptions, generationMode: mode.id})}
+                                className={`flex items-center gap-2 p-2 rounded-md text-[10px] font-bold uppercase transition-all border ${carOptions.generationMode === mode.id ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-500 hover:border-slate-700'}`}
+                             >
+                                <mode.icon className="w-3 h-3" /> {mode.label}
+                             </button>
+                          ))}
+                       </div>
+
+                      {/* 1. Paint & Body - Always visible for cars/bodies/rims/spoilers */}
+                      {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'body' || carOptions.generationMode === 'spoiler' || carOptions.generationMode === 'rim') && (
+                        <div className="space-y-3">
+                           <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
+                             <Palette className="w-3.5 h-3.5 text-cyan-500" /> Paint & Finish
+                           </div>
+                           
+                           {/* Color Grid */}
+                           <div className="flex flex-wrap gap-1.5">
+                              {CAR_COLORS.map((c) => (
+                                <button
+                                  key={c.name}
+                                  onClick={() => setCarOptions({...carOptions, color: c.name})}
+                                  title={c.name}
+                                  style={{ backgroundColor: c.hex }}
+                                  className={`w-5 h-5 rounded-sm ring-1 ring-slate-900 transition-all ${carOptions.color === c.name ? 'ring-2 ring-white scale-110 z-10' : 'hover:scale-110'}`}
+                                />
+                              ))}
+                           </div>
+                           
+                           {/* Finish Selector */}
+                           <select 
+                             value={carOptions.finish}
+                             onChange={(e) => setCarOptions({...carOptions, finish: e.target.value})}
+                             className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                           >
+                             {PAINT_FINISHES.map(s => <option key={s} value={s}>{s}</option>)}
+                           </select>
+                        </div>
+                      )}
+
+                      {/* 2. Chassis & Kit - Hidden for Wheels/Spoilers */}
+                      {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'body') && (
+                        <div className="space-y-3">
+                           <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
+                             <Car className="w-3.5 h-3.5 text-cyan-500" /> Chassis & Aero
+                           </div>
+                           <div className="grid grid-cols-1 gap-2">
+                              {/* UPDATED: Grouped Car Selection */}
+                              <select 
+                                  value={carOptions.body}
+                                  onChange={(e) => setCarOptions({...carOptions, body: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {CAR_GROUPS.map((group) => (
+                                    <optgroup key={group.category} label={group.category} className="bg-slate-900 text-cyan-500 font-bold">
+                                      {group.cars.map((car) => (
+                                        <option key={car} value={car} className="text-slate-300 font-normal">{car}</option>
+                                      ))}
+                                    </optgroup>
+                                  ))}
+                              </select>
+
+                              <select 
+                                  value={carOptions.bodyKit}
+                                  onChange={(e) => setCarOptions({...carOptions, bodyKit: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {BODY_KITS.map(s => <option key={s} value={s}>{s}</option>)}
+                              </select>
+                           </div>
+                           <div className="grid grid-cols-2 gap-2">
+                             <select 
+                                  value={carOptions.hood}
+                                  onChange={(e) => setCarOptions({...carOptions, hood: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {HOOD_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                              </select>
+                              {carOptions.generationMode === 'complete' && (
+                                <select 
+                                    value={carOptions.spoiler}
+                                    onChange={(e) => setCarOptions({...carOptions, spoiler: e.target.value})}
+                                    className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                  >
+                                    {SPOILER_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                              )}
+                           </div>
+                           {/* Wheelbase Slider */}
+                           <div className="pt-2">
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex justify-between">
+                                  <span>Wheelbase Spacing</span>
+                                  <span className="text-cyan-400 text-[10px]">{
+                                      carOptions.wheelbase < 25 ? 'Short' :
+                                      carOptions.wheelbase < 50 ? 'Standard' :
+                                      carOptions.wheelbase < 75 ? 'Extended' : 'Dragster'
+                                  }</span>
+                              </label>
+                              <input
+                                  type="range"
+                                  min="0"
+                                  max="100"
+                                  step="5"
+                                  value={carOptions.wheelbase}
+                                  onChange={(e) => setCarOptions({...carOptions, wheelbase: parseInt(e.target.value)})}
+                                  className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400"
                               />
-                            ))}
-                         </div>
-                         
-                         {/* Finish Selector */}
-                         <select 
-                           value={carOptions.finish}
-                           onChange={(e) => setCarOptions({...carOptions, finish: e.target.value})}
-                           className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                         >
-                           {PAINT_FINISHES.map(s => <option key={s} value={s}>{s}</option>)}
-                         </select>
-                      </div>
+                           </div>
+                        </div>
+                      )}
 
-                      {/* 2. Chassis & Kit */}
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
-                           <Car className="w-3.5 h-3.5 text-cyan-500" /> Chassis & Aero
-                         </div>
-                         <div className="grid grid-cols-1 gap-2">
-                            {/* UPDATED: Grouped Car Selection */}
-                            <select 
-                                value={carOptions.body}
-                                onChange={(e) => setCarOptions({...carOptions, body: e.target.value})}
-                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                              >
-                                {CAR_GROUPS.map((group) => (
-                                  <optgroup key={group.category} label={group.category} className="bg-slate-900 text-cyan-500 font-bold">
-                                    {group.cars.map((car) => (
-                                      <option key={car} value={car} className="text-slate-300 font-normal">{car}</option>
-                                    ))}
-                                  </optgroup>
-                                ))}
-                            </select>
-
-                            <select 
-                                value={carOptions.bodyKit}
-                                onChange={(e) => setCarOptions({...carOptions, bodyKit: e.target.value})}
-                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                              >
-                                {BODY_KITS.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                         </div>
-                         <div className="grid grid-cols-2 gap-2">
-                           <select 
-                                value={carOptions.hood}
-                                onChange={(e) => setCarOptions({...carOptions, hood: e.target.value})}
-                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                              >
-                                {HOOD_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                            <select 
-                                value={carOptions.spoiler}
-                                onChange={(e) => setCarOptions({...carOptions, spoiler: e.target.value})}
-                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                              >
-                                {SPOILER_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
-                         </div>
-                      </div>
-
-                      {/* 4. Wheels & Tires */}
-                      <div className="space-y-3">
-                         <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
-                           <Disc className="w-3.5 h-3.5 text-cyan-500" /> Wheels
-                         </div>
-                         <div className="grid grid-cols-1 gap-2">
-                           <select 
-                              value={carOptions.rims}
-                              onChange={(e) => setCarOptions({...carOptions, rims: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                           <select 
-                              value={carOptions.tires}
-                              onChange={(e) => setCarOptions({...carOptions, tires: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {TIRE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                         </div>
-                      </div>
+                      {/* 4. Wheels & Tires - Conditional Visibility */}
+                      {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel' || carOptions.generationMode === 'rim' || carOptions.generationMode === 'tire') && (
+                        <div className="space-y-3">
+                           <div className="flex items-center gap-2 text-xs font-bold text-slate-300 pb-1 border-b border-slate-800">
+                             <Disc className="w-3.5 h-3.5 text-cyan-500" /> Wheels & Tires
+                           </div>
+                           <div className="grid grid-cols-1 gap-2">
+                             {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel' || carOptions.generationMode === 'rim') && (
+                               <select 
+                                  value={carOptions.rims}
+                                  onChange={(e) => setCarOptions({...carOptions, rims: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
+                               </select>
+                             )}
+                             
+                             {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel' || carOptions.generationMode === 'tire') && (
+                               <select 
+                                  value={carOptions.tires}
+                                  onChange={(e) => setCarOptions({...carOptions, tires: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {TIRE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                               </select>
+                             )}
+                           </div>
+                        </div>
+                      )}
 
                       {/* 5. Accessories & FX */}
                       <div className="space-y-3">
@@ -708,42 +826,62 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                            <Flame className="w-3.5 h-3.5 text-cyan-500" /> Livery & Accessories
                          </div>
                          <div className="grid grid-cols-2 gap-2">
-                           <select 
-                              value={carOptions.livery}
-                              onChange={(e) => setCarOptions({...carOptions, livery: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {LIVERIES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                           <select 
-                              value={carOptions.accessory}
-                              onChange={(e) => setCarOptions({...carOptions, accessory: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {ACCESSORIES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                           <select 
-                              value={carOptions.exhaust}
-                              onChange={(e) => setCarOptions({...carOptions, exhaust: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {EXHAUST_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
-                           <select 
-                              value={carOptions.underglow}
-                              onChange={(e) => setCarOptions({...carOptions, underglow: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {UNDERGLOW.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
+                           {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'body') && (
+                             <select 
+                                value={carOptions.livery}
+                                onChange={(e) => setCarOptions({...carOptions, livery: e.target.value})}
+                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                              >
+                                {LIVERIES.map(s => <option key={s} value={s}>{s}</option>)}
+                             </select>
+                           )}
+                           
+                           {carOptions.generationMode === 'complete' && (
+                             <>
+                               <select 
+                                  value={carOptions.accessory}
+                                  onChange={(e) => setCarOptions({...carOptions, accessory: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {ACCESSORIES.map(s => <option key={s} value={s}>{s}</option>)}
+                               </select>
+                               <select 
+                                  value={carOptions.exhaust}
+                                  onChange={(e) => setCarOptions({...carOptions, exhaust: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {EXHAUST_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
+                               </select>
+                               <select 
+                                  value={carOptions.underglow}
+                                  onChange={(e) => setCarOptions({...carOptions, underglow: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {UNDERGLOW.map(s => <option key={s} value={s}>{s}</option>)}
+                               </select>
+                             </>
+                           )}
+                           
+                           {carOptions.generationMode === 'spoiler' && (
+                              <select 
+                                  value={carOptions.spoiler}
+                                  onChange={(e) => setCarOptions({...carOptions, spoiler: e.target.value})}
+                                  className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                >
+                                  {SPOILER_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                              </select>
+                           )}
                          </div>
-                         <select 
-                              value={carOptions.fx}
-                              onChange={(e) => setCarOptions({...carOptions, fx: e.target.value})}
-                              className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                            >
-                              {ACTION_FX.map(s => <option key={s} value={s}>{s}</option>)}
-                           </select>
+                         
+                         {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel') && (
+                           <select 
+                                value={carOptions.fx}
+                                onChange={(e) => setCarOptions({...carOptions, fx: e.target.value})}
+                                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                              >
+                                {ACTION_FX.map(s => <option key={s} value={s}>{s}</option>)}
+                             </select>
+                         )}
                       </div>
                     </div>
                   ) : (
@@ -835,42 +973,38 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
 
                       {/* Theme */}
                       <div>
-                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Theme & Style</label>
+                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Theme Style</label>
                          <select 
-                          value={uiOptions.theme}
-                          onChange={(e) => setUiOptions({...uiOptions, theme: e.target.value})}
-                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                        >
-                           {UI_THEMES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                           value={uiOptions.theme}
+                           onChange={(e) => setUiOptions({...uiOptions, theme: e.target.value})}
+                           className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                         >
+                            {UI_THEMES.map(s => <option key={s} value={s}>{s}</option>)}
+                         </select>
                       </div>
 
                       {/* Shape */}
                       <div>
-                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Shape</label>
+                         <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Element Shape</label>
                          <select 
-                          value={uiOptions.shape}
-                          onChange={(e) => setUiOptions({...uiOptions, shape: e.target.value})}
-                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
-                        >
-                           {UI_SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
+                           value={uiOptions.shape}
+                           onChange={(e) => setUiOptions({...uiOptions, shape: e.target.value})}
+                           className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                         >
+                            {UI_SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
+                         </select>
                       </div>
 
-                       {/* Colors */}
+                      {/* Primary Color */}
                       <div>
                          <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Primary Color</label>
-                         <div className="flex flex-wrap gap-1.5">
-                            {CAR_COLORS.map((c) => (
-                              <button
-                                key={c.name}
-                                onClick={() => setUiOptions({...uiOptions, primaryColor: c.name})}
-                                title={c.name}
-                                style={{ backgroundColor: c.hex }}
-                                className={`w-5 h-5 rounded-sm ring-1 ring-slate-900 transition-all ${uiOptions.primaryColor === c.name ? 'ring-2 ring-white scale-110 z-10' : 'hover:scale-110'}`}
-                              />
-                            ))}
-                         </div>
+                         <select 
+                           value={uiOptions.primaryColor}
+                           onChange={(e) => setUiOptions({...uiOptions, primaryColor: e.target.value})}
+                           className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                         >
+                            {['Cyan', 'Red', 'Green', 'Yellow', 'Purple', 'Orange', 'White'].map(s => <option key={s} value={s}>{s}</option>)}
+                         </select>
                       </div>
                     </div>
                   ) : (
@@ -883,57 +1017,62 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
           </SidebarSection>
         )}
 
-        {/* SECTION 4: GENERATION (Prompt & Button) */}
+        {/* SECTION 4: GENERATION & PROMPT */}
         <SidebarSection 
-          title="Generation" 
-          icon={Zap}
-          isOpen={sections.generation}
+          title="Generation Settings" 
+          icon={Zap} 
+          isOpen={sections.generation} 
           onToggle={() => toggleSection('generation')}
         >
           <div className="space-y-4">
              <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
-                   Prompt Preview
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex justify-between">
+                   <span>Prompt Description</span>
+                   <span className="text-slate-600 font-normal normal-case">{config.prompt.length} chars</span>
                 </label>
                 <textarea
                   value={config.prompt}
                   onChange={handlePromptChange}
-                  readOnly={(config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder) || (config.type === 'ui' && useUiBuilder)}
-                  placeholder="Asset description..."
-                  className={`w-full h-24 bg-slate-900 border border-slate-800 text-slate-300 text-xs rounded-lg focus:ring-1 focus:ring-cyan-500 focus:border-cyan-500 p-3 resize-none custom-scrollbar ${((config.type === 'car' && useCarBuilder) || (config.type === 'track' && useTrackBuilder) || (config.type === 'ui' && useUiBuilder)) ? 'opacity-70 cursor-not-allowed bg-slate-950' : ''}`}
+                  placeholder="Describe your asset in detail..."
+                  className="w-full h-32 bg-slate-900 border border-slate-800 rounded-lg p-3 text-xs text-slate-300 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none resize-none custom-scrollbar"
                 />
              </div>
-             
-             <button
-                onClick={onGenerate}
-                disabled={isGenerating || !config.prompt.trim()}
-                className={`w-full py-3.5 rounded-lg font-bold text-sm brand-font tracking-wider transition-all shadow-lg transform active:scale-95
-                  ${isGenerating 
-                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed animate-pulse border border-slate-700' 
-                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-cyan-900/30 border border-cyan-500/30'
-                  }`}
-              >
-                {isGenerating ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                  </span>
-                ) : (
-                  'GENERATE ASSET'
-                )}
-              </button>
           </div>
         </SidebarSection>
       </div>
-      
-      {/* Resizer Handle */}
-      <div 
-         className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-cyan-500/50 transition-colors z-50 flex items-center justify-center group opacity-0 hover:opacity-100"
-         onMouseDown={startResizing}
-      >
-         <div className="h-8 w-1 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+
+      {/* Footer / Generate Button */}
+      <div className="p-4 border-t border-slate-900 bg-slate-950 z-10">
+        <button
+          onClick={onGenerate}
+          disabled={isGenerating || !config.prompt}
+          className={`
+            w-full py-4 rounded-xl font-bold uppercase tracking-widest text-sm transition-all duration-300 flex items-center justify-center gap-2
+            ${isGenerating || !config.prompt 
+              ? 'bg-slate-800 text-slate-500 cursor-not-allowed' 
+              : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-cyan-500/20 active:scale-95'
+            }
+          `}
+        >
+          {isGenerating ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Forging Asset...
+            </>
+          ) : (
+            <>
+              <Sparkles className="w-4 h-4" />
+              Generate Asset
+            </>
+          )}
+        </button>
       </div>
+      
+      {/* Resize Handle */}
+      <div 
+        onMouseDown={startResizing}
+        className="absolute top-0 right-0 bottom-0 w-1 cursor-ew-resize hover:bg-cyan-500/50 transition-colors z-50" 
+      />
     </div>
   );
 };
