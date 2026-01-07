@@ -29,8 +29,8 @@ const PERSPECTIVE_PROMPTS: Record<string, string> = {
   'top-down': "STRICTLY TOP-DOWN (Bird's eye view), completely flat 2D looking down.",
   'isometric': "2.5D Isometric Game View (approx 45 degrees), showing depth and side details.",
   'side': "Direct Side Profile View (flat 2D side view), showing the full length of the car.",
-  'front': "Direct Front View (Head-on), showing the grille and headlights.",
-  'rear': "Direct Rear View, showing the taillights and exhaust."
+  'front': "Direct Front View (Head-on), showing the grille, headlights, and VERY VISIBLE front tires with realistic camber.",
+  'rear': "Direct Rear View, showing the taillights, exhaust, and VERY VISIBLE wide rear drag tires.",
 };
 
 /**
@@ -41,11 +41,19 @@ const getBase64FromDataUrl = (dataUrl: string) => {
 };
 
 export const generateAsset = async (config: GenerationConfig): Promise<string> => {
-  const { prompt, type, style, aspectRatio, perspective, hexColor } = config;
+  const { prompt, type, style, aspectRatio, perspective, hexColor, renderWheelWells, groundShadow } = config;
 
   const viewpointDescription = PERSPECTIVE_PROMPTS[perspective] || PERSPECTIVE_PROMPTS['top-down'];
   const colorConstraint = hexColor 
     ? `COLOR LOCK: The primary paint/body color MUST be EXACTLY the hex color ${hexColor}.` 
+    : "";
+
+  const maskingInstruction = renderWheelWells && perspective === 'side' 
+    ? "WHEEL MASKING: Ensure the wheel wells behind the tires are fully rendered with mechanical detail (brake rotors, suspension parts) so that if wheels are removed, the area is not transparent." 
+    : "";
+
+  const shadowInstruction = groundShadow 
+    ? "GROUNDING: Include a subtle, clean black 'shadow box' or contact shadow beneath the vehicle to ground it." 
     : "";
 
   const systemContext = `
@@ -53,7 +61,7 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
     
     STRICT BACKGROUND RULE: Place the subject on a SOLID, FLAT, PURE BLACK (#000000) background. 
     This is absolutely critical for perfect chroma-key transparency removal. Ensure:
-    - NO shadows cast onto the background.
+    - NO shadows cast onto the background unless the groundShadow box is requested.
     - NO glowing effects or gradients bleeding into the background.
     - NO white outlines or anti-aliasing against the black edge.
     - Clear, sharp boundaries between the asset and the black void.
@@ -62,7 +70,9 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
     2. Subject: ${TYPE_PROMPTS[type]}
     3. Style: ${STYLE_PROMPTS[style]}
     4. ${colorConstraint}
-    5. Specific details: ${prompt}
+    5. ${maskingInstruction}
+    6. ${shadowInstruction}
+    7. Specific details: ${prompt}
     
     The asset should be centered, fully visible, and not cropped.
   `;
@@ -103,15 +113,26 @@ export const generateAssetWithReference = async (
   basePerspective: string,
   config: GenerationConfig
 ): Promise<string> => {
-  const { prompt, type, style, aspectRatio, hexColor } = config;
+  const { prompt, type, style, aspectRatio, hexColor, renderWheelWells, groundShadow } = config;
   const targetViewpointDesc = PERSPECTIVE_PROMPTS[targetPerspective];
   const baseViewpointDesc = PERSPECTIVE_PROMPTS[basePerspective];
   
+  const maskingInstruction = renderWheelWells && targetPerspective === 'side' 
+    ? "Ensure wheel wells behind tires are rendered with detail." 
+    : "";
+
+  const shadowInstruction = groundShadow 
+    ? "Include ground contact shadow box." 
+    : "";
+
   const systemContext = `
     Reference the provided image. Generate an EXACT visual duplicate of this ${type} from a ${targetViewpointDesc} perspective.
     
     STRICT BACKGROUND RULE: Use a SOLID, FLAT, PURE BLACK (#000000) background. NO SHADOWS, NO GLOW, NO WHITE OUTLINES.
     
+    ${maskingInstruction}
+    ${shadowInstruction}
+
     Maintain EXACT body kit, wheels, and decals. 
     ${hexColor ? `Force paint color to HEX ${hexColor}.` : "Maintain reference colors."}
     

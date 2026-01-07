@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2, MoveHorizontal, AlignJustify, Square, Hash, Type, Activity, Copy, ShieldCheck } from 'lucide-react';
+import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2, MoveHorizontal, AlignJustify, Square, Hash, Type, Activity, Copy, ShieldCheck, BoxSelect, Eraser } from 'lucide-react';
 import { ArtStyle, AssetType, GenerationConfig } from '../types';
 
 interface SidebarProps {
@@ -98,7 +98,7 @@ const CAR_GROUPS = [
       "Toyota Mark II JZX110", "Nissan Laurel C33", "Nissan Cefiro A31",
       "Nissan Pulsar GTI-R", "Mitsubishi Galant VR-4", "Subaru Legacy RS",
       "Honda Accord Euro R (CL7)", "Lexus IS300 (SXE10)", "Mazda RX-3",
-      "Datsun 240Z", "Datsun 510", "Toyota Starlet KP61", "Nissan Sunny Truck (B120)"
+      "Datsun 240Z", "Datsun 510", "Toyota Starlet PC1", "Nissan Sunny Truck (B120)"
     ]
   },
   {
@@ -298,7 +298,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
       if (prev.includes(viewId)) {
         return prev.filter(v => v !== viewId);
       }
-      if (prev.length >= 3) return prev; // Limit to 3 at a time
+      if (prev.length >= 3) return prev; 
       return [...prev, viewId];
     });
   };
@@ -420,6 +420,35 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                       </button>
                     ))}
                  </div>
+             </div>
+             
+             {/* New Asset Config Toggles */}
+             <div className="space-y-2 pt-2 border-t border-slate-800">
+                <button 
+                   onClick={() => onConfigChange({ ...config, groundShadow: !config.groundShadow })}
+                   className={`w-full flex items-center justify-between p-2 rounded-lg border text-[10px] font-bold transition-all uppercase tracking-widest ${config.groundShadow ? 'bg-cyan-950/40 border-cyan-500/50 text-cyan-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                >
+                   <div className="flex items-center gap-2">
+                      <BoxSelect className="w-3 h-3" /> Ground Shadow Box
+                   </div>
+                   <div className={`w-8 h-4 rounded-full relative transition-colors ${config.groundShadow ? 'bg-cyan-500' : 'bg-slate-700'}`}>
+                      <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${config.groundShadow ? 'left-4.5' : 'left-0.5'}`} />
+                   </div>
+                </button>
+
+                {config.perspective === 'side' && (
+                  <button 
+                    onClick={() => onConfigChange({ ...config, renderWheelWells: !config.renderWheelWells })}
+                    className={`w-full flex items-center justify-between p-2 rounded-lg border text-[10px] font-bold transition-all uppercase tracking-widest ${config.renderWheelWells ? 'bg-indigo-950/40 border-indigo-500/50 text-indigo-400' : 'bg-slate-900 border-slate-800 text-slate-500'}`}
+                  >
+                    <div className="flex items-center gap-2">
+                        <Eraser className="w-3 h-3" /> Wheel Well Masking
+                    </div>
+                    <div className={`w-8 h-4 rounded-full relative transition-colors ${config.renderWheelWells ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                        <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${config.renderWheelWells ? 'left-4.5' : 'left-0.5'}`} />
+                    </div>
+                  </button>
+                )}
              </div>
           </div>
         </SidebarSection>

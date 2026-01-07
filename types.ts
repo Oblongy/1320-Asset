@@ -18,6 +18,8 @@ export interface GenerationConfig {
   aspectRatio: '1:1' | '3:4' | '4:3' | '16:9' | '9:16';
   perspective: 'top-down' | 'isometric' | 'side' | 'front' | 'rear';
   hexColor?: string;
+  renderWheelWells?: boolean;
+  groundShadow?: boolean;
 }
 
 export interface GenerationError {
