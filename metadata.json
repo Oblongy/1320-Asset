@@ -1,0 +1,5 @@
+{
+  "name": "DragGen - Top-Down Asset Generator",
+  "description": "A specialized tool for generating top-down 2D assets for drag racing games using Gemini 2.5 Flash Image. Create cars, tracks, and props in various styles.",
+  "requestFramePermissions": []
+}
