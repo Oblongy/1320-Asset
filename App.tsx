@@ -10,7 +10,8 @@ const App: React.FC = () => {
     prompt: '',
     type: 'car',
     style: 'vector',
-    aspectRatio: '1:1'
+    aspectRatio: '1:1',
+    perspective: 'top-down'
   });
 
   const [assets, setAssets] = useState<GeneratedAsset[]>([]);

@@ -13,19 +13,23 @@ const STYLE_PROMPTS: Record<ArtStyle, string> = {
 };
 
 const TYPE_PROMPTS: Record<AssetType, string> = {
-  car: "A top-down view of a drag racing car. The car should be facing vertically (up or down). Symmetrical design.",
-  track: "A top-down view of a race track segment. Asphalt texture, lane markings.",
-  prop: "A top-down view of a race track prop (like a cone, tire barrier, or flag).",
+  car: "A drag racing car. Symmetrical design.",
+  track: "A race track segment. Asphalt texture, lane markings.",
+  prop: "A race track prop (like a cone, tire barrier, or flag).",
   ui: "A user interface element for a racing game."
 };
 
 export const generateAsset = async (config: GenerationConfig): Promise<string> => {
-  const { prompt, type, style, aspectRatio } = config;
+  const { prompt, type, style, aspectRatio, perspective } = config;
+
+  const viewpointDescription = perspective === 'isometric' 
+    ? "2.5D Isometric Game View (approx 45 degrees), showing depth and side details." 
+    : "STRICTLY TOP-DOWN (Bird's eye view), completely flat 2D looking down.";
 
   const systemContext = `
-    You are an expert game artist specializing in creating 2D assets for top-down racing games.
+    You are an expert game artist specializing in creating 2D assets for racing games.
     Create an image based on the following requirements:
-    1. Viewpoint: STRICTLY TOP-DOWN (Bird's eye view).
+    1. Viewpoint: ${viewpointDescription}
     2. Background: Solid plain color (white or black) ensuring easy removal. Ideally isolated.
     3. Subject: ${TYPE_PROMPTS[type]}
     4. Style: ${STYLE_PROMPTS[style]}
