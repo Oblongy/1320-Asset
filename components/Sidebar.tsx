@@ -55,7 +55,17 @@ const RIM_STYLES = [
   'Spinner Rims', 'Neon Light-Up', 'Transparent/Glass', 'Gold Plated'
 ];
 
+const RIM_DEPTHS = [
+  'Standard Depth', 'Deep Dish', 'Concave', 'Super Deep Concave', 
+  'Flat Face', 'Step Lip', 'Zero Lip'
+];
+
 const TIRE_TYPES = ['Drag Slicks (Wrinkle Wall)', 'Semi-Slicks', 'Street Performance', 'White Lettering', 'Redline Classics', 'Stretched Tires'];
+
+const TIRE_FITMENTS = [
+  'Standard Fitment', 'Flush Fitment', 'Tucked Fitment', 'Stretched (Poke)', 
+  'Hellaflush', 'Wide Stance', 'Track Spec (Functional)'
+];
 
 // MASSIVE CAR LIST
 const CAR_GROUPS = [
@@ -363,7 +373,9 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     underglow: 'None',
     fx: 'Static / Clean',
     tint: 'Dark Smoke',
-    wheelbase: 30 // Default Standard
+    wheelbase: 30, // Default Standard
+    fitment: 'Standard Fitment',
+    dishDepth: 'Standard Depth'
   });
 
   // Track Builder State
@@ -435,7 +447,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
             `Subject: ${carOptions.body}.`,
             `Dimensions: ${wheelbaseDesc}.`,
             `Paint: ${carOptions.color} paint with a ${carOptions.finish} finish.`,
-            `Wheels: ${carOptions.rims} rims with ${carOptions.tires}.`,
+            `Wheels: ${carOptions.rims} (${carOptions.dishDepth}) with ${carOptions.tires}, ${carOptions.fitment}.`,
             `Modifications: ${carOptions.bodyKit} body kit, ${carOptions.hood}, ${carOptions.spoiler}, and ${carOptions.exhaust}.`,
             carOptions.accessory !== 'None' ? `Accessory: ${carOptions.accessory}.` : '',
             carOptions.livery !== 'Clean (No Livery)' ? `Livery: ${carOptions.livery}.` : '',
@@ -459,7 +471,9 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
           parts = [
             `Subject: Single Car Wheel and Tire.`,
             `Rim: ${carOptions.rims}, color ${carOptions.finish}.`,
+            `Rim Depth: ${carOptions.dishDepth}.`,
             `Tire: ${carOptions.tires}.`,
+            `Fitment: ${carOptions.fitment}.`,
             `View: ${view === 'top-down' ? 'Top-down view of tire tread and shoulder' : 'Side profile of rim and tire sidewall'}.`,
             `Effect: ${carOptions.fx !== 'Static / Clean' ? carOptions.fx : 'Clean studio lighting'}.`,
             baseStyle
@@ -468,6 +482,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
            parts = [
             `Subject: Single Car Wheel Rim (No Tire).`,
             `Style: ${carOptions.rims}.`,
+            `Profile: ${carOptions.dishDepth}.`,
             `Color: ${carOptions.color} ${carOptions.finish}.`,
             `View: ${view === 'top-down' ? 'Top-down view of rim face' : 'Side profile of rim'}.`,
             baseStyle
@@ -805,6 +820,27 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                                 >
                                   {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
                                </select>
+                             )}
+
+                             {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel' || carOptions.generationMode === 'rim') && (
+                               <div className="grid grid-cols-2 gap-2">
+                                  <select 
+                                      value={carOptions.dishDepth}
+                                      onChange={(e) => setCarOptions({...carOptions, dishDepth: e.target.value})}
+                                      className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                  >
+                                      {RIM_DEPTHS.map(s => <option key={s} value={s}>{s}</option>)}
+                                  </select>
+                                  {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel') && (
+                                      <select 
+                                          value={carOptions.fitment}
+                                          onChange={(e) => setCarOptions({...carOptions, fitment: e.target.value})}
+                                          className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2"
+                                      >
+                                          {TIRE_FITMENTS.map(s => <option key={s} value={s}>{s}</option>)}
+                                      </select>
+                                  )}
+                               </div>
                              )}
                              
                              {(carOptions.generationMode === 'complete' || carOptions.generationMode === 'wheel' || carOptions.generationMode === 'tire') && (
