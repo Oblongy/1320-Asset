@@ -58,6 +58,22 @@ const RIM_STYLES = [
   'Spinner Rims', 'Neon Light-Up', 'Transparent/Glass', 'Gold Plated'
 ];
 
+const TIRE_MODELS = [
+  'Standard Street Tire',
+  'Hoosier Drag Slicks (Purple Logo)',
+  'Nitto NT555RII Drag Radials',
+  'Mickey Thompson ET Street S/S',
+  'Toyo Proxes R888R (Semi-Slick)',
+  'Yokohama Advan A052',
+  'Michelin Pilot Sport Cup 2',
+  'BFGoodrich g-Force Rival S',
+  'Goodyear Eagle F1 SuperCar 3R',
+  'M&H Racemaster Slicks',
+  'Falken Azenis RT660',
+  'Vintage Redline Tires',
+  'White Lettered Racing Tires'
+];
+
 const RIM_DEPTH_OPTIONS = [
   { id: 'Standard Depth', label: 'Standard', icon: Disc, desc: 'Factory look' },
   { id: 'Deep Dish', label: 'Deep Dish', icon: Maximize2, desc: 'Large outer lip' },
@@ -250,7 +266,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     spoiler: 'No Spoiler',
     exhaust: 'Stock Hidden',
     rims: 'TE37 Style (6-Spoke)',
-    tires: 'Street Performance',
+    tireModel: 'Standard Street Tire',
     livery: 'Clean (No Livery)',
     accessory: 'None',
     underglow: 'None',
@@ -316,7 +332,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
             `Subject: ${carOptions.body}.`,
             `${paintDesc} with a ${carOptions.finish} finish.`,
             `Wheels: ${carOptions.rims} rims with ${carOptions.dishDepth} profile and ${carOptions.fitment} fitment.`,
-            `Tires: ${carOptions.tireProfile} tires.`,
+            `Tires: ${carOptions.tireModel} (${carOptions.tireProfile} profile).`,
             `Modifications: ${carOptions.bodyKit}, ${carOptions.livery}, ${carOptions.accessory}.`,
             `View: ${view}.`,
             baseStyle
@@ -325,7 +341,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
         parts = [
            `Subject: Car component: ${carOptions.generationMode}.`,
            `${paintDesc} if applicable.`,
-           `Style details: ${carOptions.rims}, ${carOptions.bodyKit}.`,
+           `Style details: ${carOptions.rims}, ${carOptions.tireModel}, ${carOptions.bodyKit}.`,
            `View: ${view}.`,
            baseStyle
         ];
@@ -560,9 +576,19 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                          <Disc className="w-3.5 h-3.5 text-cyan-500" /> Wheels, Tires & Stance
                        </div>
                        
-                       <select value={carOptions.rims} onChange={(e) => setCarOptions({...carOptions, rims: e.target.value})} className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2">
-                          {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
-                       </select>
+                       <div className="space-y-2">
+                          <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Rim Style</label>
+                          <select value={carOptions.rims} onChange={(e) => setCarOptions({...carOptions, rims: e.target.value})} className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2">
+                              {RIM_STYLES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                       </div>
+
+                       <div className="space-y-2">
+                          <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Tire Model</label>
+                          <select value={carOptions.tireModel} onChange={(e) => setCarOptions({...carOptions, tireModel: e.target.value})} className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-300 rounded p-2">
+                              {TIRE_MODELS.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                       </div>
 
                        <label className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-1">Rim Depth</label>
                        <div className="grid grid-cols-3 gap-2">
