@@ -44,7 +44,6 @@ const App: React.FC = () => {
 
     try {
       if (isSet && selectedPerspectives && selectedPerspectives.length > 0) {
-        // Generate selected perspectives sequentially for visual consistency
         const views = selectedPerspectives as GenerationConfig['perspective'][];
         setGenProgress({ current: 0, total: views.length });
         
@@ -57,7 +56,6 @@ const App: React.FC = () => {
           
           let imageUrl: string;
           
-          // Use the first generated view as a visual reference for subsequent views
           if (referenceImageUrl) {
             imageUrl = await generateAssetWithReference(referenceImageUrl, targetView, baseView, {
               ...config,
@@ -101,6 +99,10 @@ const App: React.FC = () => {
 
   const handleDelete = (id: string) => {
     setAssets(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleUpdateAsset = (id: string, newUrl: string) => {
+    setAssets(prev => prev.map(a => a.id === id ? { ...a, imageUrl: newUrl } : a));
   };
 
   return (
@@ -147,7 +149,6 @@ const App: React.FC = () => {
           </div>
         </header>
 
-        {/* Global Progress Indicator */}
         {genProgress && (
           <div className="absolute top-20 right-8 bg-slate-900 border border-cyan-500/50 text-cyan-400 px-6 py-4 rounded-xl shadow-2xl z-40 flex flex-col gap-2 min-w-[200px] animate-in slide-in-from-right-4">
              <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest">
@@ -174,7 +175,7 @@ const App: React.FC = () => {
 
         <main className="flex-1 overflow-hidden relative bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
           {currentView === 'gallery' ? (
-             <AssetGallery assets={assets} onDelete={handleDelete} />
+             <AssetGallery assets={assets} onDelete={handleDelete} onUpdateAsset={handleUpdateAsset} />
           ) : (
              <Workbench assets={assets} />
           )}

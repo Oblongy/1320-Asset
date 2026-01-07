@@ -4,8 +4,8 @@ import { ArtStyle, AssetType, GenerationConfig } from "../types";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const STYLE_PROMPTS: Record<ArtStyle, string> = {
-  pixel: "16-bit pixel art style, crisp edges, limited color palette, retro game asset, no anti-aliasing, transparent background",
-  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style, isolated on white background",
+  pixel: "16-bit pixel art style, crisp edges, limited color palette, retro game asset, no anti-aliasing, transparent-ready",
+  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style, high contrast isolation",
   realistic: "Photorealistic 2D render, high detail, unreal engine 5 render, isolated studio lighting",
   sketch: "Hand drawn pencil sketch on paper, artistic, rough lines, white paper background",
   blueprint: "Technical blueprint schematic, white lines on blue background, engineering drawing",
@@ -45,21 +45,26 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
 
   const viewpointDescription = PERSPECTIVE_PROMPTS[perspective] || PERSPECTIVE_PROMPTS['top-down'];
   const colorConstraint = hexColor 
-    ? `COLOR LOCK: The primary paint/body color MUST be EXACTLY the hex color ${hexColor}. No variations in shade or tint.` 
+    ? `COLOR LOCK: The primary paint/body color MUST be EXACTLY the hex color ${hexColor}.` 
     : "";
 
   const systemContext = `
-    You are an expert game artist specializing in creating 2D assets for racing games.
-    Create an image based on the following requirements:
-    1. Viewpoint: ${viewpointDescription}
-    2. Background: TRANSPARENT. The subject must be perfectly isolated on a solid white background (or alpha channel if supported).
-    3. Subject: ${TYPE_PROMPTS[type]}
-    4. Style: ${STYLE_PROMPTS[style]}
-    5. ${colorConstraint}
-    6. Specific details: ${prompt}
+    You are an expert game artist. Create a high-definition 2D game asset.
     
-    Ensure the asset is centered and fully visible within the frame. No cropping.
-    Output purely the subject.
+    STRICT BACKGROUND RULE: Place the subject on a SOLID, FLAT, PURE BLACK (#000000) background. 
+    This is absolutely critical for perfect chroma-key transparency removal. Ensure:
+    - NO shadows cast onto the background.
+    - NO glowing effects or gradients bleeding into the background.
+    - NO white outlines or anti-aliasing against the black edge.
+    - Clear, sharp boundaries between the asset and the black void.
+    
+    1. Viewpoint: ${viewpointDescription}
+    2. Subject: ${TYPE_PROMPTS[type]}
+    3. Style: ${STYLE_PROMPTS[style]}
+    4. ${colorConstraint}
+    5. Specific details: ${prompt}
+    
+    The asset should be centered, fully visible, and not cropped.
   `;
 
   try {
@@ -92,9 +97,6 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
   }
 };
 
-/**
- * Generates an asset variant based on an existing reference image to ensure high visual consistency.
- */
 export const generateAssetWithReference = async (
   referenceImageUrl: string,
   targetPerspective: string,
@@ -104,24 +106,17 @@ export const generateAssetWithReference = async (
   const { prompt, type, style, aspectRatio, hexColor } = config;
   const targetViewpointDesc = PERSPECTIVE_PROMPTS[targetPerspective];
   const baseViewpointDesc = PERSPECTIVE_PROMPTS[basePerspective];
-  const colorConstraint = hexColor 
-    ? `COLOR CONTINUITY: The body color MUST stay EXACTLY the hex color ${hexColor}. Reference the image for the specific car design but force the paint to match this hex.` 
-    : "Maintain the exact same colors and livery as the reference image.";
-
+  
   const systemContext = `
-    You are an expert game artist. Look at the provided reference image which shows a ${type} from a ${baseViewpointDesc} perspective.
+    Reference the provided image. Generate an EXACT visual duplicate of this ${type} from a ${targetViewpointDesc} perspective.
     
-    TASK: Generate an EXACT visual duplicate of this specific ${type} but shown from a ${targetViewpointDesc} perspective.
+    STRICT BACKGROUND RULE: Use a SOLID, FLAT, PURE BLACK (#000000) background. NO SHADOWS, NO GLOW, NO WHITE OUTLINES.
     
-    STRICT REQUIREMENTS:
-    1. Visual Continuity: Maintain the EXACT same body kit parts, wheel style, and decals as the reference image.
-    2. ${colorConstraint}
-    3. Viewpoint: ${targetViewpointDesc}
-    4. Background: TRANSPARENT/SOLID WHITE. Isolated subject.
-    5. Style: ${STYLE_PROMPTS[style]}
-    6. Subject details: ${prompt}
+    Maintain EXACT body kit, wheels, and decals. 
+    ${hexColor ? `Force paint color to HEX ${hexColor}.` : "Maintain reference colors."}
     
-    The resulting image should look like it belongs to the exact same asset set as the reference.
+    Style: ${STYLE_PROMPTS[style]}
+    Details: ${prompt}
   `;
 
   try {
