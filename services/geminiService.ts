@@ -5,8 +5,8 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const STYLE_PROMPTS: Record<ArtStyle, string> = {
   pixel: "16-bit pixel art style, crisp edges, limited color palette, retro game asset, no anti-aliasing, transparent background",
-  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style, isolated on white",
-  realistic: "Photorealistic 2D render, high detail, unreal engine 5 render, raytraced, isolated studio lighting",
+  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style, isolated on white background",
+  realistic: "Photorealistic 2D render, high detail, unreal engine 5 render, isolated studio lighting",
   sketch: "Hand drawn pencil sketch on paper, artistic, rough lines, white paper background",
   blueprint: "Technical blueprint schematic, white lines on blue background, engineering drawing",
   neon: "Cyberpunk neon aesthetics, glowing lights, dark background, synthwave style",
@@ -33,42 +33,46 @@ const PERSPECTIVE_PROMPTS: Record<string, string> = {
   'rear': "Direct Rear View, showing the taillights and exhaust."
 };
 
+/**
+ * Extracts base64 data from a data URL
+ */
+const getBase64FromDataUrl = (dataUrl: string) => {
+  return dataUrl.split(',')[1];
+};
+
 export const generateAsset = async (config: GenerationConfig): Promise<string> => {
-  const { prompt, type, style, aspectRatio, perspective } = config;
+  const { prompt, type, style, aspectRatio, perspective, hexColor } = config;
 
   const viewpointDescription = PERSPECTIVE_PROMPTS[perspective] || PERSPECTIVE_PROMPTS['top-down'];
+  const colorConstraint = hexColor ? `The PRIMARY PAINT COLOR of the subject MUST be exactly HEX CODE ${hexColor}. This is non-negotiable.` : "";
 
   const systemContext = `
     You are an expert game artist specializing in creating 2D assets for racing games.
     Create an image based on the following requirements:
     1. Viewpoint: ${viewpointDescription}
-    2. Background: TRANSPARENT. The subject must be perfectly isolated. Do not render a floor, shadow, or environment unless explicitly asked.
+    2. Background: TRANSPARENT. The subject must be perfectly isolated.
     3. Subject: ${TYPE_PROMPTS[type]}
     4. Style: ${STYLE_PROMPTS[style]}
-    5. Specific details: ${prompt}
+    5. Color Lock: ${colorConstraint}
+    6. Specific details: ${prompt}
     
     Ensure the asset is centered and fully visible within the frame.
-    Output purely the subject. If the model cannot generate transparency, use a solid white background for easy removal.
+    Output purely the subject. If the model cannot generate transparency, use a solid white background.
   `;
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-3-flash-preview',
       contents: {
-        parts: [
-          {
-            text: systemContext,
-          },
-        ],
+        parts: [{ text: systemContext }],
       },
       config: {
         imageConfig: {
-            aspectRatio: aspectRatio,
+          aspectRatio: aspectRatio,
         }
       },
     });
 
-    // Extract image from response parts
     if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
       for (const part of response.candidates[0].content.parts) {
         if (part.inlineData && part.inlineData.data) {
@@ -83,5 +87,73 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
   } catch (error: any) {
     console.error("Gemini Generation Error:", error);
     throw new Error(error.message || "Failed to generate asset");
+  }
+};
+
+/**
+ * Generates an asset variant based on an existing reference image to ensure high visual consistency.
+ */
+export const generateAssetWithReference = async (
+  referenceImageUrl: string,
+  targetPerspective: string,
+  basePerspective: string,
+  config: GenerationConfig
+): Promise<string> => {
+  const { prompt, type, style, aspectRatio, hexColor } = config;
+  const targetViewpointDesc = PERSPECTIVE_PROMPTS[targetPerspective];
+  const baseViewpointDesc = PERSPECTIVE_PROMPTS[basePerspective];
+  const colorConstraint = hexColor ? `The PRIMARY PAINT COLOR MUST stay EXACTLY ${hexColor} across this new perspective.` : "";
+
+  const systemContext = `
+    You are an expert game artist. Look at the provided reference image which shows a ${type} from a ${baseViewpointDesc} perspective.
+    
+    TASK: Generate an EXACT visual duplicate of this ${type} but shown from a ${targetViewpointDesc} perspective.
+    
+    STRICT REQUIREMENTS:
+    1. Visual Continuity: Maintain the EXACT same color (USE HEX ${hexColor || 'FROM IMAGE'}), body kit parts, wheel style, liveries, and lighting as the reference image.
+    2. Color Lock: ${colorConstraint}
+    3. Viewpoint: ${targetViewpointDesc}
+    4. Background: TRANSPARENT.
+    5. Style: ${STYLE_PROMPTS[style]}
+    6. Subject details: ${prompt}
+    
+    The resulting image should look like it belongs to the exact same asset set as the reference.
+  `;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              mimeType: "image/png",
+              data: getBase64FromDataUrl(referenceImageUrl),
+            },
+          },
+          { text: systemContext },
+        ],
+      },
+      config: {
+        imageConfig: {
+          aspectRatio: aspectRatio,
+        }
+      },
+    });
+
+    if (response.candidates && response.candidates[0].content && response.candidates[0].content.parts) {
+      for (const part of response.candidates[0].content.parts) {
+        if (part.inlineData && part.inlineData.data) {
+          const base64EncodeString: string = part.inlineData.data;
+          const mimeType = part.inlineData.mimeType || 'image/png';
+          return `data:${mimeType};base64,${base64EncodeString}`;
+        }
+      }
+    }
+
+    throw new Error("No image data found in response");
+  } catch (error: any) {
+    console.error("Gemini Consistency Generation Error:", error);
+    throw new Error(error.message || "Failed to generate consistent variant");
   }
 };
