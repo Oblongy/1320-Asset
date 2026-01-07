@@ -4,18 +4,18 @@ import { ArtStyle, AssetType, GenerationConfig } from "../types";
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const STYLE_PROMPTS: Record<ArtStyle, string> = {
-  pixel: "16-bit pixel art style, crisp edges, limited color palette, retro game asset",
-  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style",
-  realistic: "Photorealistic 2D render, high detail, unreal engine 5 render, raytraced",
-  sketch: "Hand drawn pencil sketch on paper, artistic, rough lines",
+  pixel: "16-bit pixel art style, crisp edges, limited color palette, retro game asset, no anti-aliasing, transparent background",
+  vector: "Clean flat vector illustration, adobe illustrator style, bold lines, solid colors, svg style, isolated on white",
+  realistic: "Photorealistic 2D render, high detail, unreal engine 5 render, raytraced, isolated studio lighting",
+  sketch: "Hand drawn pencil sketch on paper, artistic, rough lines, white paper background",
   blueprint: "Technical blueprint schematic, white lines on blue background, engineering drawing",
   neon: "Cyberpunk neon aesthetics, glowing lights, dark background, synthwave style",
-  lowpoly: "Low poly 3D style, flat shading, sharp geometric shapes, PlayStation 1 aesthetic",
-  celshaded: "Cel-shaded, anime style, bold outlines, toon shading, vibrant colors",
+  lowpoly: "Low poly 3D style, flat shading, sharp geometric shapes, PlayStation 1 aesthetic, isolated",
+  celshaded: "Cel-shaded, anime style, bold outlines, toon shading, vibrant colors, isolated",
   vaporwave: "Vaporwave aesthetic, pink and blue gradients, grid lines, retro 80s computer graphics",
-  watercolor: "Watercolor painting style, soft edges, artistic, paper texture",
+  watercolor: "Watercolor painting style, soft edges, artistic, paper texture, white background",
   oil: "Oil painting style, textured brush strokes, rich colors",
-  marker: "Alcohol marker drawing, Copic style, vibrant, hand-drawn design"
+  marker: "Alcohol marker drawing, Copic style, vibrant, hand-drawn design, white background"
 };
 
 const TYPE_PROMPTS: Record<AssetType, string> = {
@@ -42,12 +42,13 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
     You are an expert game artist specializing in creating 2D assets for racing games.
     Create an image based on the following requirements:
     1. Viewpoint: ${viewpointDescription}
-    2. Background: Transparent. The subject must be perfectly isolated on a transparent background with no background elements or solid colors.
+    2. Background: TRANSPARENT. The subject must be perfectly isolated. Do not render a floor, shadow, or environment unless explicitly asked.
     3. Subject: ${TYPE_PROMPTS[type]}
     4. Style: ${STYLE_PROMPTS[style]}
     5. Specific details: ${prompt}
     
     Ensure the asset is centered and fully visible within the frame.
+    Output purely the subject. If the model cannot generate transparency, use a solid white background for easy removal.
   `;
 
   try {

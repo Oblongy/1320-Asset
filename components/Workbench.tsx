@@ -143,29 +143,26 @@ const Workbench: React.FC<WorkbenchProps> = ({ assets }) => {
         const data = imageData.data;
         
         // Auto-detect background color from corners
-        // We verify 4 corners and pick the most common color or just top-left if consistent
         const getPixel = (x: number, y: number) => {
           const idx = (y * canvas.width + x) * 4;
           return [data[idx], data[idx+1], data[idx+2], data[idx+3]];
         };
 
-        const corners = [
-          getPixel(0, 0),
-          getPixel(canvas.width - 1, 0),
-          getPixel(0, canvas.height - 1),
-          getPixel(canvas.width - 1, canvas.height - 1)
-        ];
-
         // Use top-left as reference
-        const [rRef, gRef, bRef] = corners[0];
+        const [rRef, gRef, bRef, aRef] = getPixel(0, 0);
         
+        // If the reference pixel (top-left) is already transparent, assume image is already processed
+        if (aRef < 50) {
+            console.log("Image appears to already have a transparent background.");
+            continue;
+        }
+
         const tolerance = 40; // Adjustable tolerance
         
         for (let i = 0; i < data.length; i += 4) {
           const r = data[i];
           const g = data[i+1];
           const b = data[i+2];
-          // const a = data[i+3];
           
           const dist = Math.sqrt((r - rRef) ** 2 + (g - gRef) ** 2 + (b - bRef) ** 2);
           
