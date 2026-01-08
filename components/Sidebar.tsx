@@ -47,81 +47,108 @@ const CAR_COLORS = [
 
 const PAINT_FINISHES = [
   'Gloss (Standard)', 'Matte / Flat', 'Metallic', 'Satin', 'Chrome', 'Pearlescent', 
-  'Color Shift / Chameleon', 'Carbon Fiber Wrap', 'Rusty / Patina', 'Camo Wrap', 'Glitter Flake'
+  'Color Shift / Chameleon', 'Carbon Fiber Wrap', 'Rusty / Patina', 'Camo Wrap', 'Glitter Flake',
+  'Forged Carbon', 'Brushed Metal', 'Iridescent', 'Clear-Coat Raw Carbon', 'Frozen Matte'
 ];
 
 const RIM_STYLES = [
-  // --- Spoke Designs ---
+  // --- Spoke Designs (Requested) ---
   'Y-Spoke (Modern Exotic)', 'Mesh Style (BBS Classic)', 'Blade Spoke (Directional)', 'Twisted Turbo Fan', 
-  'TE37 Style (6-Spoke)', 'RPF1 Style (Twin Spoke)', 'Work Meister (Deep Dish)', 'CE28 Style (Multi-spoke)', 
-  'Advan 3-Spoke Classic', 'Split 5-Spoke (V-Style)', 'Solid Disc (Moon Cap)', 'Beadlock Drag Rim',
-  'Skinny Front Runner (Drag)', 'Centerline Convo Pro', 'Weld Racing (Magnum)', 'Deep Concave 10-Spoke',
-  'Turbine Style (Electric Look)', 'Wire Spoke (Lowrider)', 'Dished 3-Piece Wheel', 'Forged Monoblock',
-  'Hollow Spoke (Supercar)', 'Star Pattern (Muscle)', 'Classic 5-Spoke (Torq Thrust)', 'Euro Mesh (Rotiform)',
-  'Aero Disc (Track)', 'Carbon Fiber Weave Rim', 'Magnesium Race Wheel', 'Heritage Steelie', 'Bullet Hole Steelie'
+  // --- JDM Legends ---
+  'TE37 Style (6-Spoke)', 'RPF1 Style (Twin Spoke)', 'Work Meister S1 (Deep Dish)', 'CE28 Style (Multi-spoke)', 
+  'Advan GT Premium', 'Volk ZE40', 'SSR Professor MS3', 'Work Emotion CR Kiwami', 'Desmond Regamaster Evo',
+  'Watanabe 8-Spoke', 'Hayashi Racing Street', 'Longchamp XR-4', 'Work Equip 01', 'Work Equip 03', 'SSR Star Shark',
+  'Mugen M7', 'Spoon SW388', 'NISMO LMGT4', 'Enkei RS05-RR', 'Gram Lights 57DR', 'AVS Model 5', 'Blitz 03',
+  // --- Drag & Muscle ---
+  'Beadlock Drag Rim', 'Skinny Front Runner (Drag)', 'Centerline Convo Pro', 'Weld Racing (Magnum)', 
+  'Weld AlumaStar 2.0', 'Bogart Racing Force 5', 'Cragar S/S Classic', 'American Racing Torq Thrust',
+  'Mickey Thompson Classic III', 'Centerline Warrior', 'Weld Racing V-Series', 'Drag Star 92',
+  // --- Modern Performance & Luxury ---
+  'HRE P101 Forged', 'Vossen CVT Directional', 'ADV.1 Track Spec', 'Rotiform BLQ', 'Fifteen52 Turbomac',
+  'Vorsteiner V-FF 103', 'Brixton Forged WR3', 'Ferrada FR2', 'Rohana RFX11', 'TSW Sebring', 'Konig Hypergram',
+  'Titan 7 T-S5', 'Apex ARC-8', 'BBS RI-D Forged', 'BBS FI-R Centerlock', 'Lamborghini Telesto Style',
+  'Ferrari Aperta Star', 'Porsche GT3 Centerlock', 'McLaren 720S 10-Spoke', 'Bugatti Chiron Turbine',
+  // --- Retro & Vintage ---
+  'Solid Disc (Moon Cap)', 'Wire Spoke (Classic 72-spoke)', 'Heritage Steelie', 'Bullet Hole Steelie', 
+  'Porsche Fuchs Classic', 'BMW Bottlecaps', 'Audi Turbofan', 'Rotiform Aerodisc', 'Speedline Turini',
+  'Compomotive TH2 Rally', 'MOMO Heritage 6', 'Weld Racing Pro Star', 'Centerline Auto Drag',
+  // --- Off-Road ---
+  'Fuel Off-Road Assault', 'Method Race Wheels 305', 'Black Rhino Arsenal', 'KMC XD820 Grenade',
+  'Aero Race Wheel (Steel)', 'Mud-Terrain Beadlock', 'Tactical Military Wheel'
 ];
 
 const TREAD_PATTERNS = [
-  'Symmetric Street (All-Season)', 'Asymmetric Performance (Summer)', 'Directional V-Groove (Rain)', 
-  'Semi-Slick (Competition)', 'Full Drag Slick (Smooth)', 'Wrinkle Wall Slick (Low Pressure)',
-  'Off-Road A/T Rugged', 'Mud-Terrain Extreme (Chunky)', 'Vintage Cross-Ply (Classic)',
-  'Low-Profile Stance (Stretch)', 'Winter Studded (Ice)', 'F1 Intermediate Pattern'
+  'Symmetric Street', 'Asymmetric Performance', 'Directional Sport', 'Off-Road Rugged', 
+  'Semi-Slick (Track Day)', 'Full Drag Slick (Smooth)', 'Wrinkle Wall Slick (Low Pressure)',
+  'Mud-Terrain Extreme (Chunky)', 'Vintage Cross-Ply (Classic)',
+  'Low-Profile Stance (Stretch)', 'Winter Studded (Ice)', 'F1 Intermediate Pattern',
+  'Formula Drift Smoke Pattern', 'Rally Gravel Tread', 'Classic Redline Sidewall'
 ];
 
 const TIRE_MODELS = [
   'Standard Street Performance', 'Hoosier Drag Slicks (Purple Logo)', 'Nitto NT555RII Drag Radials',
   'Mickey Thompson ET Street S/S', 'Toyo Proxes R888R', 'Yokohama Advan A052', 'Michelin Pilot Sport Cup 2',
-  'BFGoodrich g-Force Rival S', 'Goodyear Eagle F1 SuperCar 3R', 'M&H Racemaster Slicks', 'Falken Azenis RT660'
+  'BFGoodrich g-Force Rival S', 'Goodyear Eagle F1 SuperCar 3R', 'M&H Racemaster Slicks', 'Falken Azenis RT660',
+  'Pirelli P-Zero Trofeo R', 'Continental ExtremeContact DWS06', 'Hankook Ventus R-S4'
 ];
 
 const HOOD_STYLES = [
   'Stock Hood', 'Vented Carbon Fiber', 'Cowl Induction (High Rise)', 'GT500 Style Vent', 'Clear Power-dome',
   'Double Slat Vent', 'Ram Air Intake Scoops', 'Forward Facing Hood Scoop', 'Blower Cutout (Exposed Engine)',
-  'Louvered Steel Hood', 'Reverse Cowl', 'Wide-Mouth Intake'
+  'Louvered Steel Hood', 'Reverse Cowl', 'Wide-Mouth Intake', 'Mugen Style Vented', 'D-Max Style DMAX',
+  'TS-Style Vented Carbon', 'RR-Style Hood', 'Drag Spec Lexan Clear', 'Speed-Holes / Perforated'
 ];
 
 const SPOILER_STYLES = [
   'No Spoiler', 'Ducktail Lip (Integrated)', 'GT Wing (High Mount)', 'Chassis Mount Big Wing', 
   'Swan Neck Spoiler', 'Active Aero Flaps', 'Drag Parachute Mount', 'Wickerbill Extension',
-  'Whale Tail (Classic)', 'Roof Spoiler (Vortex Generator)', 'Mid-Spoiler (Hatch)', 'Carbon Fiber Lip'
+  'Whale Tail (Classic)', 'Roof Spoiler (Vortex Generator)', 'Mid-Spoiler (Hatch)', 'Carbon Fiber Lip',
+  'Pandem Rocket Bunny Wing', 'Liberty Walk V3 Ducktail', 'Time Attack Voltex Wing', 'Nismo Style R34 Wing',
+  'Supra MK4 OEM Wing', 'RX7 Whale Tail', 'Drag Wing (Sheet Metal)', 'Dual Element GT Wing'
 ];
 
 const LIGHTING_OPTIONS = [
   'Standard OEM Bulbs', 'Modern LED Halo Rings', 'Xenon HID (Blue Tint)', 'Yellow Fog / Le Mans Style',
   'Blackout / Smoked Lenses', 'RGB Color-Chase Underglow', 'Interior Neon Glow', 'Pop-up Headlights (Open)',
-  'Pop-up Headlights (Closed)', 'Sequential LED Bars', 'Exposed Rally Pods'
+  'Pop-up Headlights (Closed)', 'Sequential LED Bars', 'Exposed Rally Pods', 'Laser Headlights',
+  'Clear Altezza Tail Lights', 'JDM Amber Corners', 'Underbody Strobe Kit', 'Tire Lettering LED'
 ];
 
 const EXHAUST_STYLES = [
   'Stock Hidden', 'Dual Chrome Tips', 'Quad Burnt Titanium', 'Side Exit (Fender)', 'Hood Exit (Fire Spitting)',
-  'Straight Pipe Center', 'Oval VIP Tips', 'Shotgun Exhaust', 'Blast Pipe (Angled)', 'External Wastegate Dump'
+  'Straight Pipe Center', 'Oval VIP Tips', 'Shotgun Exhaust', 'Blast Pipe (Angled)', 'External Wastegate Dump',
+  'Screamer Pipe (Fender)', 'Boso-Style Takeyari', 'Dual Center Exit (GT3 Style)', 'Dolphin Tip', 'Heart-Shaped Tip'
 ];
 
 const DIFFUSER_AERO = [
   'Stock Bumper', 'Aggressive Rear Diffuser', 'Front Splitter with Rods', 'Side Skirt Extensions', 
   'Full Underbody Tray', 'Canards / Dive Planes', 'Widebody Overfenders', 'Rear Bumper Cut (Weight Reduction)',
-  'Fender Vents (Functional)', 'Roof Scoop (Rally Style)', 'Rear Window Louvers'
+  'Fender Vents (Functional)', 'Roof Scoop (Rally Style)', 'Rear Window Louvers', 'Active Underbody Fan',
+  'Chassis-Mounted Front Lip', 'Full Belly Pan', 'Aero Disk Wheel Covers', 'Rear Wheel Spats'
 ];
 
-// Added missing BODY_KITS constant
 const BODY_KITS = [
   'Stock Body', 'Widebody Rocket Bunny Style', 'Liberty Walk Style Widebody',
   'GT3 Race Spec', 'Drift Spec (Angle Kit)', 'Drag Spec (Weight Reduced)',
-  'Time Attack Aero', 'Off-Road Lifted Kit', 'Rally Raid Armor'
+  'Time Attack Aero', 'Off-Road Lifted Kit', 'Rally Raid Armor',
+  'Vertex Lang Style', 'BN Sports Blister Kit', '326 Power Gachabari', 'RWB Porsche Widebody',
+  'Veilside Fortune', 'KBD Polyurethane Kit', 'Pandem V3 Widebody', 'Varis Kamikaze-R',
+  'RE Amemiya GT-AD', 'C-West Aero', 'M-Sports Drift Spec', 'Spirit Rei Ka Miyabi'
 ];
 
-// Added missing LIVERIES constant
 const LIVERIES = [
   'Clean (No Livery)', 'Racing Stripes', 'Full Race Wrap (Sponsors)',
   'Digital Camo', 'Hoonigan Style', 'Retro ITASHA (Anime)',
-  'Police Interceptor', 'Rust & Patina', 'Carbon Fiber Accents'
+  'Police Interceptor', 'Rust & Patina', 'Carbon Fiber Accents',
+  'Falken Drift Livery', 'Castrol Rally Livery', 'Gulf Racing Heritage', 'Martini Racing Stripe',
+  'ADVAN Red/Black Livery', 'Top Secret Gold Paint', 'RE Amemiya Blue Graphics', 'Spoon Sports Yellow/Blue'
 ];
 
-// Added missing ACCESSORIES constant
 const ACCESSORIES = [
   'None', 'Roof Rack with Cargo Box', 'Rear Mounted Bike Rack',
   'Tow Hook (Front)', 'Roll Cage (Internal)', 'Window Net (Race)',
-  'LED Light Bar (Roof)', 'Bull Bar (Front)'
+  'LED Light Bar (Roof)', 'Bull Bar (Front)', 'Wheelie Bar (Drag)', 'Parachute (Drag)',
+  'Exposed Front Intercooler', 'Nitrous Tanks (Visible)', 'Fuel Cell (Visible)', 'Window Louvers'
 ];
 
 const RIM_DEPTH_OPTIONS = [
@@ -297,8 +324,8 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
     spoiler: 'No Spoiler',
     exhaust: 'Stock Hidden',
     rims: 'TE37 Style (6-Spoke)',
-    tireModel: 'Standard Street Tire',
-    treadPattern: 'Symmetric Street (All-Season)',
+    tireModel: 'Standard Street Performance',
+    treadPattern: 'Symmetric Street',
     lighting: 'Standard OEM Bulbs',
     livery: 'Clean (No Livery)',
     accessory: 'None',
