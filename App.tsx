@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Rocket, Github, Info, Layers, Image as ImageIcon, PenTool, Loader2 } from 'lucide-react';
 import Sidebar from './components/Sidebar';
@@ -12,7 +13,10 @@ const App: React.FC = () => {
     type: 'car',
     style: 'vector',
     aspectRatio: '1:1',
-    perspective: 'top-down'
+    perspective: 'top-down',
+    renderWheelWells: false,
+    wheelWellDetail: 'basic',
+    groundShadow: false
   });
 
   const [assets, setAssets] = useState<GeneratedAsset[]>([]);

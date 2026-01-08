@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { ArtStyle, AssetType, GenerationConfig, WheelWellDetail } from "../types";
 
@@ -34,9 +35,9 @@ const PERSPECTIVE_PROMPTS: Record<string, string> = {
 };
 
 const WHEEL_WELL_DETAIL_PROMPTS: Record<WheelWellDetail, string> = {
-  basic: "The wheel wells should be simple, dark, and shadowed voids behind the tires.",
-  rotors: "Inside the wheel wells, render high-performance drilled and slotted brake rotors with large, visible multi-piston brake calipers.",
-  full: "Inside the wheel wells, provide full mechanical detail: large brake rotors, brightly colored calipers, visible coilover suspension, springs, and control arms."
+  basic: "The wheel wells should be rendered as simple, deep, dark shadowed voids with no internal detail.",
+  rotors: "Inside the wheel wells, render high-performance multi-piston brake calipers in a contrasting color and drilled metal brake rotors.",
+  full: "Inside the wheel wells, provide intricate mechanical detail including high-performance coilovers with visible springs, control arms, brake rotors with large calipers, and chassis structural elements."
 };
 
 /**
@@ -55,7 +56,7 @@ export const generateAsset = async (config: GenerationConfig): Promise<string> =
     : "";
 
   const maskingInstruction = renderWheelWells && perspective === 'side' 
-    ? `WHEEL MASKING: ${WHEEL_WELL_DETAIL_PROMPTS[wheelWellDetail || 'basic']} This area must be fully rendered so it is not transparent if wheels are removed.` 
+    ? `WHEEL MASKING: ${WHEEL_WELL_DETAIL_PROMPTS[wheelWellDetail || 'basic']} Ensure the area behind where the wheels would sit is fully detailed so it can be used for tire-swapping in-game.` 
     : "";
 
   const shadowInstruction = groundShadow 

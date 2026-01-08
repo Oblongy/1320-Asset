@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Settings, Car, Map, Cone, Layout, Zap, Image as ImageIcon, Sparkles, PenTool, MousePointer2, Palette, Wrench, Sliders, CheckCircle2, Flag, Trees, Grid, ArrowUp, Box, Layers, Flame, Wind, ChevronDown, GripVertical, Monitor, Terminal, CircleDashed, Disc, PaintBucket, Eye, Cpu, MousePointer, Component, Circle, Aperture, Minimize2, Maximize2, MoveHorizontal, AlignJustify, Square, Hash, Type, Activity, Copy, ShieldCheck, BoxSelect, Eraser, Activity as SuspensionIcon } from 'lucide-react';
 import { ArtStyle, AssetType, GenerationConfig, WheelWellDetail } from '../types';
@@ -104,7 +105,7 @@ const CAR_GROUPS = [
   {
     category: "JDM Icons (Classic & 90s)",
     cars: [
-      "Nissan Skyline GT-R R34 V-Spec", "Nissan Skyline GT-R R33", "Nissan Skyline GT-R R32",
+      "Nissan Skyline GT-R R34 V-Spec", "Nissan Skyline GT-R R33", "Nissan Skyline GT-R R34",
       "Toyota Supra MK4 (JZA80)", "Mazda RX-7 FD Spirit R", "Honda NSX-R (NA2)",
       "Mitsubishi Lancer Evolution IX", "Mitsubishi Lancer Evolution VI TME",
       "Subaru Impreza 22B STi", "Nissan Silvia S15 Spec-R", "Nissan Silvia S14 Kouki",
@@ -353,7 +354,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
         hexColor: useAdvancedPaint ? carOptions.customHex : undefined
       });
     }
-  }, [carOptions, useCarBuilder, useAdvancedPaint, config.type, config.perspective]);
+  }, [carOptions, useCarBuilder, useAdvancedPaint, config.type, config.perspective, config.renderWheelWells, config.wheelWellDetail]);
 
   return (
     <div 
@@ -471,9 +472,9 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                         <label className="block text-[8px] font-bold text-slate-600 uppercase tracking-tighter">Mask Internal Detail</label>
                         <div className="grid grid-cols-3 gap-1.5">
                           {[
-                            { id: 'basic', label: 'Basic', icon: Circle, desc: 'Empty Shadow' },
-                            { id: 'rotors', label: 'Rotors', icon: Disc, desc: 'Brakes/Caliper' },
-                            { id: 'full', label: 'Mechanical', icon: SuspensionIcon, desc: 'Full Suspension' }
+                            { id: 'basic', label: 'Basic', icon: Circle, desc: 'Simple Shaded Cavity' },
+                            { id: 'rotors', label: 'Rotors', icon: Disc, desc: 'Brakes & Calipers' },
+                            { id: 'full', label: 'Mechanical', icon: SuspensionIcon, desc: 'Suspension & Chassis' }
                           ].map((detail) => (
                             <button
                               key={detail.id}
@@ -486,6 +487,7 @@ const Sidebar: React.FC<SidebarProps> = ({ config, isGenerating, onConfigChange,
                             </button>
                           ))}
                         </div>
+                        <p className="text-[8px] text-slate-500 italic px-1">Detailed wheel wells allow for realistic component swapping in your engine.</p>
                       </div>
                     )}
                   </div>
